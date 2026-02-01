@@ -107,3 +107,5 @@ gh pr create --title "(#{issue_number}) {type}: {PR title}" --body "Closes #{iss
 ## References
 - [Semantic Commit Messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)
 - [Branch Naming Convention](https://gist.github.com/seunggabi/87f8c722d35cd07deb3f649d45a31082)
+
+> **Last Updated**: 2025-02-01 - Conventions embedded from referenced gists
