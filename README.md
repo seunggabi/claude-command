@@ -11,27 +11,33 @@ Custom commands for Claude Code CLI.
 git clone https://github.com/seunggabi/claude-command.git
 cd claude-command
 mkdir -p ~/.claude/commands
-cp *.md ~/.claude/commands/
+cp -f changelog.md cleanup.md commit-push-pr.md done.md release.md status.md sync.md ~/.claude/commands/
 ```
 
 **One-liner:**
 ```bash
-git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp /tmp/claude-command/*.md ~/.claude/commands/ && rm -rf /tmp/claude-command
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp -f /tmp/claude-command/{changelog,cleanup,commit-push-pr,done,release,status,sync}.md ~/.claude/commands/ && rm -rf /tmp/claude-command
 ```
 
 ### Project-specific Installation
 
 ```bash
 mkdir -p .claude/commands
+cd .claude/commands
 curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/commit-push-pr.md
 curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/done.md
-mv *.md .claude/commands/
+curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/sync.md
+curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/cleanup.md
+curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/status.md
+curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/release.md
+curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/changelog.md
+cd -
 ```
 
 ### Update
 
 ```bash
-git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && cp /tmp/claude-command/*.md ~/.claude/commands/ && rm -rf /tmp/claude-command
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && cp -f /tmp/claude-command/{changelog,cleanup,commit-push-pr,done,release,status,sync}.md ~/.claude/commands/ && rm -rf /tmp/claude-command
 ```
 
 ## Commands
