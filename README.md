@@ -36,6 +36,16 @@ git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command &&
 
 ## Commands
 
+| Command | Description |
+|---------|-------------|
+| `/commit-push-pr` | Create issue → branch → commit → push → PR |
+| `/done` | Merge PR → close issue → cleanup |
+| `/sync` | Rebase current branch with main |
+| `/cleanup` | Remove merged local/remote branches |
+| `/status` | Show project status (git, issues, PRs) |
+| `/release` | Create version tag and GitHub release |
+| `/changelog` | Generate changelog from commits |
+
 ### `/commit-push-pr`
 
 Automatically creates issue, branch, commit, push, and PR.
@@ -57,6 +67,56 @@ Merges PR and closes related issue.
 2. Squash merge PR
 3. Close issue (if not auto-closed)
 4. Checkout main, pull, delete local branch
+
+### `/sync`
+
+Synchronizes current branch with the latest main branch using rebase.
+
+**Workflow:**
+1. Stash uncommitted changes
+2. Fetch latest and rebase on main
+3. Handle conflicts if any
+4. Restore stash and force push
+
+### `/cleanup`
+
+Removes merged local and remote branches.
+
+**Workflow:**
+1. Switch to main and update
+2. Fetch and prune remote
+3. Delete local merged branches
+4. Delete remote merged branches (with confirmation)
+
+### `/status`
+
+Shows comprehensive project status.
+
+**Displays:**
+- Git status and recent commits
+- Open issues and PRs
+- Assigned items
+- Recent merges
+
+### `/release`
+
+Creates a version tag and GitHub release.
+
+**Workflow:**
+1. Ensure on main and up-to-date
+2. Determine version bump (semver)
+3. Generate changelog
+4. Create annotated tag
+5. Create GitHub release with notes
+
+### `/changelog`
+
+Generates a formatted changelog from git commits.
+
+**Workflow:**
+1. Determine commit range (from last tag)
+2. Group commits by type
+3. Format as markdown changelog
 
 ## Conventions
 
