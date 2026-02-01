@@ -44,7 +44,7 @@ Automatically creates issue, branch, commit, push, and PR.
 1. Check current branch (if on main)
 2. Analyze changes and determine type (feat/fix/refactor/chore)
 3. Create GitHub issue
-4. Create branch: `{type}/#{issue_number}-{alias}`
+4. Create branch: `{type}/#{issue_number}_{alias}`
 5. Commit: `(#{issue_number}) {type}: {description}`
 6. Push and create PR
 
@@ -62,13 +62,13 @@ Merges PR and closes related issue.
 
 ### Branch Naming
 ```
-{type}/#{issue_number}-{alias}
+{type}/#{issue_number}_{alias}
 ```
 Examples:
-- `feat/#123-add-login`
-- `fix/#124-fix-auth-bug`
-- `refactor/#125-cleanup-code`
-- `chore/#126-update-deps`
+- `feat/#123_add-login`
+- `fix/#124_fix-auth-bug`
+- `refactor/#125_cleanup-code`
+- `chore/#126_update-deps`
 
 ### Commit Message Format
 ```

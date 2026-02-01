@@ -7,7 +7,7 @@ Automatically creates issue, branch, commit, push, and PR.
 1. **Check current branch**: Verify if on main branch
 2. **Analyze changes**: Review git diff to understand changes
 3. **Create issue**: Register GitHub issue (if on main branch)
-4. **Create branch**: `{type}/#{issue_number}-{alias}` format
+4. **Create branch**: `{type}/#{issue_number}_{alias}` format
 5. **Commit**: `(#{issue_number}) {type}: {description}` format
 6. **Push & Create PR**
 
@@ -35,14 +35,14 @@ gh issue create --title "{issue title}" --body "{changes summary}"
 
 ### Step 4: Create branch
 ```bash
-git checkout -b {type}/#{issue_number}-{alias}
+git checkout -b {type}/#{issue_number}_{alias}
 ```
 
 Branch naming convention:
-- `feat/#123-add-login`
-- `fix/#124-fix-auth-bug`
-- `refactor/#125-cleanup-code`
-- `chore/#126-update-deps`
+- `feat/#123_add-login`
+- `fix/#124_fix-auth-bug`
+- `refactor/#125_cleanup-code`
+- `chore/#126_update-deps`
 
 ### Step 5: Commit
 ```bash

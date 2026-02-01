@@ -18,8 +18,8 @@ gh pr status
 ```
 
 Extract issue number from branch name:
-- `feat/#123-add-login` → `123`
-- `fix/#124-fix-bug` → `124`
+- `feat/#123_add-login` → `123`
+- `fix/#124_fix-bug` → `124`
 
 ### Step 2: Check and merge PR
 ```bash
