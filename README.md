@@ -1,85 +1,88 @@
 # Claude Commands
 
-Claude Code에서 사용하는 커스텀 커맨드 모음입니다.
+Custom commands for Claude Code CLI.
 
-## 설치
+## Installation
 
-### 전역 설치 (모든 프로젝트에서 사용)
+### Global Installation (Available in all projects)
 
 ```bash
-# 클론 및 전역 설치
+# Clone and install globally
 git clone https://github.com/seunggabi/claude-command.git
 cd claude-command
 mkdir -p ~/.claude/commands
 cp *.md ~/.claude/commands/
 ```
 
-**원라이너:**
+**One-liner:**
 ```bash
 git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp /tmp/claude-command/*.md ~/.claude/commands/ && rm -rf /tmp/claude-command
 ```
 
-### 프로젝트별 설치 (특정 프로젝트에서만 사용)
+### Project-specific Installation
 
 ```bash
 mkdir -p .claude/commands
-cp commit-push-pr.md .claude/commands/
-cp done.md .claude/commands/
+curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/commit-push-pr.md
+curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/done.md
+mv *.md .claude/commands/
 ```
 
-### 업데이트
+### Update
 
 ```bash
 git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && cp /tmp/claude-command/*.md ~/.claude/commands/ && rm -rf /tmp/claude-command
 ```
 
-## 커맨드 목록
+## Commands
 
 ### `/commit-push-pr`
 
-자동으로 이슈 생성, 브랜치 생성, 커밋, 푸시, PR 생성을 수행합니다.
+Automatically creates issue, branch, commit, push, and PR.
 
-**워크플로우:**
-1. 현재 브랜치 확인 (main인지)
-2. 변경사항 분석 후 타입 결정 (feat/fix/refactor/chore)
-3. GitHub 이슈 생성
-4. 브랜치 생성: `{type}/#{issue_number}-{alias}`
-5. 커밋: `(#{issue_number}) {type}: {description}`
-6. 푸시 및 PR 생성
+**Workflow:**
+1. Check current branch (if on main)
+2. Analyze changes and determine type (feat/fix/refactor/chore)
+3. Create GitHub issue
+4. Create branch: `{type}/#{issue_number}-{alias}`
+5. Commit: `(#{issue_number}) {type}: {description}`
+6. Push and create PR
 
 ### `/done`
 
-PR을 머지하고 관련 이슈를 클로즈합니다.
+Merges PR and closes related issue.
 
-**워크플로우:**
-1. 현재 브랜치에서 이슈 번호 추출
-2. PR squash merge
-3. 이슈 클로즈 (자동으로 안 닫힌 경우)
-4. main으로 이동, pull, 로컬 브랜치 삭제
+**Workflow:**
+1. Extract issue number from current branch
+2. Squash merge PR
+3. Close issue (if not auto-closed)
+4. Checkout main, pull, delete local branch
 
-## 컨벤션
+## Conventions
 
-### 브랜치 명명 규칙
+### Branch Naming
 ```
 {type}/#{issue_number}-{alias}
 ```
+Examples:
 - `feat/#123-add-login`
 - `fix/#124-fix-auth-bug`
 - `refactor/#125-cleanup-code`
 - `chore/#126-update-deps`
 
-### 커밋 메시지 형식
+### Commit Message Format
 ```
 (#{issue_number}) {type}: {description}
 ```
-- `(#123) feat: 로그인 기능 추가`
-- `(#124) fix: 인증 버그 수정`
+Examples:
+- `(#123) feat: add login feature`
+- `(#124) fix: fix authentication bug`
 
-### PR 제목 형식
+### PR Title Format
 ```
 (#{issue_number}) {type}: {description}
 ```
 
-## 참고
+## References
 - [Semantic Commit Messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)
 - [Branch Naming Convention](https://gist.github.com/seunggabi/87f8c722d35cd07deb3f649d45a31082)
