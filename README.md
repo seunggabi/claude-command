@@ -4,12 +4,33 @@ Claude Code에서 사용하는 커스텀 커맨드 모음입니다.
 
 ## 설치
 
-프로젝트의 `.claude/commands/` 디렉토리에 원하는 커맨드 파일을 복사하세요.
+### 전역 설치 (모든 프로젝트에서 사용)
+
+```bash
+# 클론 및 전역 설치
+git clone https://github.com/seunggabi/claude-command.git
+cd claude-command
+mkdir -p ~/.claude/commands
+cp *.md ~/.claude/commands/
+```
+
+**원라이너:**
+```bash
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp /tmp/claude-command/*.md ~/.claude/commands/ && rm -rf /tmp/claude-command
+```
+
+### 프로젝트별 설치 (특정 프로젝트에서만 사용)
 
 ```bash
 mkdir -p .claude/commands
 cp commit-push-pr.md .claude/commands/
 cp done.md .claude/commands/
+```
+
+### 업데이트
+
+```bash
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && cp /tmp/claude-command/*.md ~/.claude/commands/ && rm -rf /tmp/claude-command
 ```
 
 ## 커맨드 목록
