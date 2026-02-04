@@ -1,35 +1,26 @@
-# /strategy — Repo Strategy & Next-Step Planner
+# Strategy - Multi-Agent Repository Analysis & Next-Step Planner
 
-You are Claude Code running an end-to-end repository analysis to produce an actionable strategy for what to do next.
+Comprehensive repository analysis using 7 specialized agents to produce an actionable strategy with prioritized roadmap, backlog, and PR plan.
 
-## Mission
+## Workflow
 
-Analyze this repository with a multi-agent approach and output a concrete, evidence-backed plan:
-- What the repo is and how it works
-- What is missing / risky
-- What to do next (prioritized roadmap, backlog, and PR plan)
+1. **Repo Intake**: Scan structure, identify key files, create output directory
+2. **Multi-Agent Analysis**: Run 7 agents (Architect, Product, Security, Ops, Performance, Quality, DX)
+3. **Synthesis**: Combine findings into strategy, backlog, and roadmap documents
+4. **Output**: Write 12 structured reports to `./strategy/` directory
 
-**Hard Requirements**
-- Create `./strategy/` directory (relative to repo root) before writing any outputs
-- All analysis outputs MUST be written under `./strategy/`
-- Do not hallucinate. Every factual claim must reference specific file paths, code locations, configs, or commands you actually inspected
-- If uncertain, label it **Unknown** and propose exactly how to verify
-- Prefer minimal viable changes and PR-sliced execution over "big rewrite" suggestions
+## Execution Steps
 
----
+### Step 1: Setup Output Directory
 
-## Phase 0 — Repo Intake (Mandatory)
-
-**You MUST complete this phase before any analysis.**
-
-### Step 0.1: Setup Output Directory
-```bash
+~~~bash
 mkdir -p ./strategy
 echo "Strategy analysis started: $(date)" > ./strategy/.timestamp
-```
+~~~
 
-### Step 0.2: Print Repository Context
-```bash
+### Step 2: Print Repository Context
+
+~~~bash
 echo "=== Repository Context ==="
 echo "Working Directory: $(pwd)"
 echo "Repository: $(basename $(pwd))"
@@ -39,601 +30,211 @@ git branch --show-current 2>/dev/null || echo "No branch info"
 git remote -v 2>/dev/null | head -2 || echo "No remotes configured"
 echo ""
 echo "Default branch:"
-git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "Unknown (check manually)"
-```
+git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || git remote show origin 2>/dev/null | grep 'HEAD branch' | cut -d: -f2 | tr -d ' ' || echo "Unknown"
+~~~
 
-### Step 0.3: Generate Repo Map
-```bash
-echo "=== Directory Structure (depth 4) ==="
-find . -type d \( -name "node_modules" -o -name ".git" -o -name "vendor" -o -name "__pycache__" -o -name ".venv" -o -name "dist" -o -name "build" -o -name "strategy" \) -prune -o -type f -print 2>/dev/null | head -200
+### Step 3: Generate Repo Map
+
+~~~bash
+echo "=== Directory Structure ==="
+if command -v tree &> /dev/null; then
+  tree -L 4 -I 'node_modules|.git|vendor|__pycache__|.venv|dist|build|strategy' --dirsfirst 2>/dev/null || find . -type d \( -name "node_modules" -o -name ".git" -o -name "vendor" -o -name "__pycache__" -o -name ".venv" -o -name "dist" -o -name "build" -o -name "strategy" \) -prune -o -print 2>/dev/null | head -100
+else
+  find . -type d \( -name "node_modules" -o -name ".git" -o -name "vendor" -o -name "__pycache__" -o -name ".venv" -o -name "dist" -o -name "build" -o -name "strategy" \) -prune -o -print 2>/dev/null | head -100
+fi
 
 echo ""
 echo "=== Top-Level Contents ==="
 ls -la
-```
+~~~
 
-### Step 0.4: Identify and Read Key Files
+### Step 4: Identify and Read Key Files
 
-Scan for these files. READ each one that exists:
+Scan for and READ each file that exists. Mark missing files as "Not Found":
 
 | Category | Files to Check |
 |----------|----------------|
-| Documentation | `README.md`, `README`, `docs/`, `CONTRIBUTING.md`, `CHANGELOG.md` |
-| Package/Build | `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Makefile`, `CMakeLists.txt` |
-| Config | `.env.example`, `config/`, `settings/`, `*.config.js`, `*.config.ts` |
-| Docker | `Dockerfile`, `docker-compose.yml`, `.dockerignore` |
-| CI/CD | `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.circleci/`, `azure-pipelines.yml` |
-| IaC | `terraform/`, `pulumi/`, `cloudformation/`, `k8s/`, `helm/` |
-| Database | `migrations/`, `schema.sql`, `prisma/`, `alembic/`, `db/` |
-| Entry Points | `main.*`, `index.*`, `app.*`, `server.*`, `cli.*`, `src/main.*`, `src/index.*` |
-| Tests | `test/`, `tests/`, `__tests__/`, `spec/`, `*_test.*`, `*.spec.*` |
-| Security | `.env`, `secrets/`, `credentials/`, `.npmrc`, `.pypirc` |
+| Documentation | README.md, README, docs/, CONTRIBUTING.md, CHANGELOG.md |
+| Package/Build | package.json, pyproject.toml, Cargo.toml, go.mod, pom.xml, build.gradle, Makefile |
+| Config | .env.example, config/, settings/, *.config.js, *.config.ts |
+| Docker | Dockerfile, docker-compose.yml, .dockerignore |
+| CI/CD | .github/workflows/, .gitlab-ci.yml, Jenkinsfile, .circleci/ |
+| IaC | terraform/, pulumi/, k8s/, helm/ |
+| Database | migrations/, schema.sql, prisma/, alembic/ |
+| Entry Points | main.*, index.*, app.*, server.*, src/main.*, src/index.* |
+| Tests | test/, tests/, __tests__/, spec/ |
 
-### Step 0.5: Write Phase 0 Artifacts
+**For repos with minimal files**: If README.md is missing, check for any .md file. If no package manifest exists, infer stack from file extensions.
 
-**Write `./strategy/repo-map.md`**:
-```markdown
+### Step 5: Write repo-map.md
+
+Use the Write tool to create `./strategy/repo-map.md`:
+
+~~~
 # Repository Map
 
 ## Basic Info
-- **Name**: {repo name}
-- **Path**: {absolute path}
-- **Git Status**: {branch, clean/dirty}
-- **Default Branch**: {main/master/unknown}
+- **Name**: {{repo_name}}
+- **Path**: {{absolute_path}}
+- **Git Status**: {{branch}}, {{clean_or_dirty}}
+- **Default Branch**: {{main_or_master_or_unknown}}
 
 ## Directory Tree
-```
-{tree output, depth 4, excluding node_modules/.git/etc}
-```
+{{tree_output}}
 
 ## Key Files Identified
 | Category | File | Status |
 |----------|------|--------|
-| README | README.md | Found |
-| Package | package.json | Found |
-| Docker | Dockerfile | Not Found |
+| README | README.md | Found/Not Found |
+| Package | package.json | Found/Not Found |
 ...
-```
+~~~
 
-**Write `./strategy/inspected-files.md`**:
-```markdown
+### Step 6: Write inspected-files.md
+
+Use the Write tool to create `./strategy/inspected-files.md`:
+
+~~~
 # Inspected Files
 
-Files read during analysis (Phase 0 + Phase 1):
-
 ## Phase 0 - Intake
-- [x] `./README.md`
-- [x] `./package.json`
-- [ ] `./Dockerfile` (not found)
+- [x] ./README.md
+- [x] ./package.json
+- [ ] ./Dockerfile (not found)
 ...
 
 ## Phase 1 - Agent Analysis
-(Updated by each agent)
-```
+(Each agent appends files it inspected)
+~~~
 
----
+### Step 7: Run Agent A - Architect
 
-## Phase 1 — Multi-Agent Analysis
-
-Run ALL agents below. Each agent MUST:
-1. List files/directories it inspected (with paths)
-2. Report findings with evidence citations (file:line)
-3. Provide risks (with severity) and recommendations
-4. Write its report to the specified file
-
----
-
-### Agent A — Architect (System & Code Structure)
-
-**Inspect**: Entry points, module directories, dependency files, import graphs
-
-**Analyze**:
+Analyze system and code structure. Focus on:
 - Architecture style (monolith, microservices, modular monolith, serverless)
 - Module boundaries and responsibilities
-- Dependency graph (external deps, internal module deps)
+- Dependency graph (external and internal)
 - Layering violations (presentation → business → data)
-- Coupling hotspots (files with many imports)
-- Tech debt concentration areas
-- Unclear ownership zones
+- Coupling hotspots
+- Tech debt concentration
 
-**Write `./strategy/agent-architect.md`**:
-```markdown
+Write findings to `./strategy/agent-architect.md` with this structure:
+
+~~~
 # Agent A: Architect Report
 
 ## Files Inspected
-- `./src/index.ts`
-- `./src/modules/`
-...
+- {{path1}}
+- {{path2}}
 
 ## Architecture Style
-**Type**: {monolith/microservices/etc.}
-**Evidence**: {path:line or description}
+**Type**: {{style}}
+**Evidence**: {{path:line}}
 
 ## Module Map
-| Module | Path | Responsibility | Key Dependencies |
-|--------|------|----------------|------------------|
-
-## Dependency Analysis
-### External Dependencies
-{count} dependencies — Evidence: {package.json/etc.}
-
-### Internal Coupling
-| File | Imports | Imported By | Coupling Score |
-|------|---------|-------------|----------------|
-
-## Layering Assessment
-- Presentation Layer: {path}
-- Business Layer: {path}
-- Data Layer: {path}
-- Violations: {list or "None found"}
+| Module | Path | Responsibility | Dependencies |
+|--------|------|----------------|--------------|
 
 ## Tech Debt Hotspots
 | Location | Issue | Severity | Evidence |
 |----------|-------|----------|----------|
 
 ## Recommendations
-1. {recommendation} — Priority: {High/Med/Low}
-...
+1. {{recommendation}} — Priority: High/Med/Low
 
-## Risks Identified
+## Risks
 | Risk | Impact | Likelihood | Evidence |
 |------|--------|------------|----------|
-```
+~~~
 
----
+### Step 8: Run Agent B - Product
 
-### Agent B — Product/UX (Value, Use Cases, Docs)
-
-**Inspect**: README, docs/, examples/, API docs, CLI help, UI components
-
-**Analyze**:
+Analyze value proposition and documentation. Focus on:
 - Problem statement and target users
-- Primary use cases and user journeys
-- How to run locally (documented vs actual)
-- Documentation completeness
-- Missing product artifacts (examples, screenshots, tutorials)
+- Primary use cases
+- Local run instructions (documented vs actual)
+- Documentation gaps
+- Missing artifacts (examples, screenshots, tutorials)
 
-**Write `./strategy/agent-product.md`**:
-```markdown
-# Agent B: Product Report
+Write findings to `./strategy/agent-product.md`.
 
-## Files Inspected
-- `./README.md`
-- `./docs/`
-...
+### Step 9: Run Agent C - Security
 
-## Product Overview
-**Problem Solved**: {description}
-**Evidence**: {path} or **Unknown**
-
-**Target Users**: {audience}
-**Evidence**: {path} or **Unknown**
-
-## Use Cases
-| Use Case | Documented | Evidence |
-|----------|------------|----------|
-| {use case 1} | Yes/No | {path} |
-
-## Local Run Instructions
-**Documented**: Yes/No/Partial — {path}
-**Verified Steps**:
-```bash
-{actual commands that work}
-```
-**Gaps**: {what's missing or wrong}
-
-## Documentation Assessment
-| Document | Status | Quality | Gap |
-|----------|--------|---------|-----|
-| README | Present | Good | Missing install steps |
-| API Docs | Missing | - | Create OpenAPI spec |
-
-## Missing Artifacts
-- [ ] Example usage code
-- [ ] Screenshots/demos
-- [ ] API documentation
-- [ ] Tutorials
-
-## Recommendations
-1. {recommendation}
-...
-```
-
----
-
-### Agent C — Security (Threats, Secrets, AuthZ/AuthN)
-
-**Inspect**: .env*, config files, auth modules, API routes, dependencies, lockfiles
-
-**Analyze**:
-- Secrets in repo (API keys, passwords, tokens)
-- Unsafe configurations (debug mode, permissive CORS)
-- Dependency vulnerabilities
-- Authentication implementation
-- Authorization/permission boundaries
+Analyze security posture. Focus on:
+- Secrets in repo (scan for API keys, passwords, tokens)
+- Unsafe configurations
+- Dependency vulnerabilities (run npm audit / pip-audit / cargo audit if applicable)
+- Auth implementation
 - OWASP Top 10 risk areas
 
-**Write `./strategy/agent-security.md`**:
-```markdown
-# Agent C: Security Report
+Write findings to `./strategy/agent-security.md`.
 
-## Files Inspected
-- `./config/`
-- `./.env.example`
-- `./src/auth/`
-...
+### Step 10: Run Agent D - Operations
 
-## Secrets Scan
-| Finding | File | Line | Severity | Action Required |
-|---------|------|------|----------|-----------------|
-| Hardcoded API key | config.js | 42 | Critical | Remove + rotate |
-| .env in repo | .env | - | Critical | Add to .gitignore |
-
-## Dependency Vulnerabilities
-**Scan Command**: `npm audit` / `pip-audit` / `cargo audit`
-**Results**:
-| Package | Vulnerability | Severity | Fix |
-|---------|---------------|----------|-----|
-
-## Authentication Assessment
-**Method**: {JWT/session/OAuth/API key/none}
-**Evidence**: {path:line}
-**Issues**:
-- {issue 1}
-
-## Authorization Assessment
-**Model**: {RBAC/ABAC/none}
-**Evidence**: {path}
-**Issues**:
-- {issue 1}
-
-## OWASP Top 10 Check
-| Risk | Status | Evidence | Mitigation |
-|------|--------|----------|------------|
-| A01 Broken Access Control | At Risk | {path} | Add middleware |
-| A02 Cryptographic Failures | OK | - | - |
-| A03 Injection | Unknown | - | Review inputs |
-...
-
-## Recommendations
-1. {recommendation} — Severity: {Critical/High/Med/Low}
-...
-```
-
----
-
-### Agent D — Reliability/Operations (Deployability & Observability)
-
-**Inspect**: Dockerfile, CI configs, deployment scripts, logging, health endpoints
-
-**Analyze**:
+Analyze deployability and observability. Focus on:
 - Deployment method and environments
 - Configuration management
 - Logging, metrics, tracing
 - Health checks
-- Failure modes and recovery
-- Runbooks existence
+- Failure modes
+- Runbooks
 
-**Write `./strategy/agent-ops.md`**:
-```markdown
-# Agent D: Operations Report
+Write findings to `./strategy/agent-ops.md`.
 
-## Files Inspected
-- `./Dockerfile`
-- `./.github/workflows/`
-- `./docker-compose.yml`
-...
+### Step 11: Run Agent E - Performance
 
-## Deployment
-**Method**: {Docker/K8s/serverless/manual/Unknown}
-**Evidence**: {path}
-
-**Environments**:
-| Environment | Configured | Evidence |
-|-------------|------------|----------|
-| Development | Yes | docker-compose.yml |
-| Staging | Unknown | - |
-| Production | Unknown | - |
-
-## Configuration Management
-**Method**: {env vars/config files/secrets manager}
-**Evidence**: {path}
-**Issues**:
-- {issue}
-
-## Observability
-| Aspect | Status | Evidence | Gap |
-|--------|--------|----------|-----|
-| Structured Logging | No | src/logger.ts | Add JSON format |
-| Metrics | Missing | - | Add Prometheus |
-| Tracing | Missing | - | Add OpenTelemetry |
-| Error Tracking | Missing | - | Add Sentry |
-
-## Health Checks
-**Endpoint**: {/health or Missing}
-**Evidence**: {path}
-
-## Failure Modes
-| Scenario | Handled | Evidence | Recommendation |
-|----------|---------|----------|----------------|
-| DB connection lost | No | - | Add retry logic |
-| Memory exhaustion | No | - | Add limits |
-
-## Runbooks
-**Status**: {Present/Missing}
-**Location**: {path or "Create ./docs/runbooks/"}
-
-## Recommendations
-1. {recommendation}
-...
-```
-
----
-
-### Agent E — Performance (Bottlenecks & Scalability)
-
-**Inspect**: Database queries, API handlers, data processing, caching, async patterns
-
-**Analyze**:
-- Hot paths identification
-- Database access patterns (N+1, missing indexes)
+Analyze bottlenecks and scalability. Focus on:
+- Hot paths
+- Database patterns (N+1, missing indexes)
 - Caching strategy
-- Async/concurrent usage
-- Resource usage hints
+- Async usage
+- Resource usage
 
-**Write `./strategy/agent-performance.md`**:
-```markdown
-# Agent E: Performance Report
+Write findings to `./strategy/agent-performance.md`.
 
-## Files Inspected
-- `./src/api/`
-- `./src/db/`
-...
+### Step 12: Run Agent F - Quality
 
-## Hot Paths
-| Path | Location | Frequency | Complexity | Risk |
-|------|----------|-----------|------------|------|
-| User lookup | api/users.ts:45 | High | O(1) | Low |
-| Report generation | api/reports.ts:120 | Medium | O(n²) | High |
-
-## Database Patterns
-| Pattern | Location | Issue | Fix |
-|---------|----------|-------|-----|
-| N+1 Query | api/orders.ts:67 | Loop fetches | Use JOIN/batch |
-| Missing Index | - | Unknown | Run EXPLAIN |
-| No Connection Pool | db/index.ts | Single conn | Add pooling |
-
-## Caching Assessment
-**Current Strategy**: {none/in-memory/Redis/CDN}
-**Evidence**: {path}
-**Gaps**:
-- {gap 1}
-
-## Async Usage
-**Pattern**: {callbacks/promises/async-await}
-**Issues**:
-| Location | Issue | Fix |
-|----------|-------|-----|
-| api/sync.ts:34 | Blocking call | Make async |
-
-## Resource Usage
-| Resource | Current | Recommendation |
-|----------|---------|----------------|
-| Memory | Unknown | Add monitoring |
-| CPU | Unknown | Profile hot paths |
-| Connections | Unbounded | Add limits |
-
-## Benchmarks to Run
-```bash
-# Load test
-{command}
-
-# Profile hot path
-{command}
-```
-
-## Recommendations
-1. {recommendation}
-...
-```
-
----
-
-### Agent F — Quality (Testing, CI, Release)
-
-**Inspect**: Test directories, CI configs, coverage reports, linting config
-
-**Analyze**:
-- Test coverage and types
+Analyze testing and CI. Focus on:
+- Test coverage and types (unit/integration/e2e)
 - CI pipeline completeness
 - Static analysis configuration
 - Release process
 - Versioning strategy
 
-**Write `./strategy/agent-quality.md`**:
-```markdown
-# Agent F: Quality Report
+Write findings to `./strategy/agent-quality.md`.
 
-## Files Inspected
-- `./tests/`
-- `./.github/workflows/`
-- `./.eslintrc`
-...
+### Step 13: Run Agent G - DX
 
-## Test Coverage
-| Type | Present | Location | Coverage | Quality |
-|------|---------|----------|----------|---------|
-| Unit | Yes/No | tests/unit/ | ~60% | Good |
-| Integration | Yes/No | tests/integration/ | 0% | - |
-| E2E | Yes/No | tests/e2e/ | 0% | - |
-
-**Coverage Report**: {path or "Not configured"}
-
-## CI Pipeline
-**Platform**: {GitHub Actions/GitLab CI/Jenkins/None}
-**Evidence**: {path}
-
-| Stage | Configured | Evidence |
-|-------|------------|----------|
-| Lint | Yes/No | {path} |
-| Type Check | Yes/No | {path} |
-| Unit Tests | Yes/No | {path} |
-| Integration Tests | Yes/No | {path} |
-| Build | Yes/No | {path} |
-| Deploy | Yes/No | {path} |
-
-## Static Analysis
-| Tool | Configured | Evidence | Issues |
-|------|------------|----------|--------|
-| ESLint/Pylint | Yes/No | {path} | {count} |
-| TypeScript | Yes/No | tsconfig.json | strict: false |
-| Prettier | Yes/No | {path} | - |
-
-## Release Process
-**Method**: {manual/CI automated/semantic-release}
-**Evidence**: {path}
-
-**Versioning**: {semver/calver/none}
-**Evidence**: {package.json version field}
-
-**Changelog**: {manual/auto-generated/missing}
-**Evidence**: {CHANGELOG.md}
-
-## Recommendations
-1. {recommendation}
-...
-```
-
----
-
-### Agent G — DX (Developer Experience)
-
-**Inspect**: Setup scripts, package scripts, Makefile, devcontainer, IDE configs
-
-**Analyze**:
-- Local setup friction
-- Available scripts and commands
+Analyze developer experience. Focus on:
+- Setup friction (steps to first run)
+- Available scripts
 - Development tooling
-- Consistency enforcement
-- Onboarding experience
+- Consistency enforcement (lint, format, hooks)
+- Onboarding time estimate
 
-**Write `./strategy/agent-dx.md`**:
-```markdown
-# Agent G: DX Report
+Write findings to `./strategy/agent-dx.md`.
 
-## Files Inspected
-- `./package.json` (scripts)
-- `./Makefile`
-- `./.vscode/`
-...
+### Step 14: Synthesize strategy.md
 
-## Setup Friction
-**Steps to First Run**: {count}
-**Prerequisites**: {list}
-**Estimated Onboarding Time**: {X minutes/hours}
+Combine all agent findings. Use the Write tool to create `./strategy/strategy.md`:
 
-**Actual Setup Commands**:
-```bash
-{verified steps}
-```
-
-**Pain Points**:
-- {pain point 1}
-
-## Available Scripts
-| Script | Command | Purpose | Works |
-|--------|---------|---------|-------|
-| dev | npm run dev | Start dev server | Yes |
-| test | npm test | Run tests | Yes |
-| build | npm run build | Production build | Yes |
-
-## Development Tooling
-| Tool | Present | Evidence | Gap |
-|------|---------|----------|-----|
-| Hot Reload | Yes/No | {path} | - |
-| Debugging | Yes/No | .vscode/launch.json | Missing |
-| DevContainer | Yes/No | .devcontainer/ | Missing |
-
-## Consistency Enforcement
-| Check | When | Evidence |
-|-------|------|----------|
-| Lint | CI only | .github/workflows |
-| Format | Pre-commit | .husky/pre-commit |
-| Type Check | CI only | - |
-
-## IDE Configuration
-| IDE | Config Present | Evidence |
-|-----|----------------|----------|
-| VS Code | Yes/No | .vscode/ |
-| JetBrains | Yes/No | .idea/ |
-
-## Recommendations
-1. {recommendation}
-...
-```
-
----
-
-## Phase 2 — Synthesis
-
-After all agents complete, produce the integrated strategy documents.
-
----
-
-### Write `./strategy/strategy.md`
-
-```markdown
+~~~
 # Strategy Report
 
-**Repository**: {name}
-**Generated**: {timestamp}
-**Analyzed By**: Claude Code Multi-Agent Strategy
-
----
+**Repository**: {{name}}
+**Generated**: {{timestamp}}
 
 ## 1. Repo Snapshot
-
-**Purpose**: {one-line description}
-**Evidence**: {README.md path}
-
-**Primary Stack**:
-- Language: {language}
-- Framework: {framework}
-- Evidence: {package.json/etc.}
-
-**How to Run Locally**:
-```bash
-{verified commands}
-```
-
-**Deployment**: {method} — Evidence: {path} or **Unknown**
-
-**Architecture Overview**:
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   {Layer}   │ ──▶ │   {Layer}   │ ──▶ │   {Layer}   │
-└─────────────┘     └─────────────┘     └─────────────┘
-```
-
-**Module Map**:
-| Module | Path | Responsibility |
-|--------|------|----------------|
-
----
+**Purpose**: {{description}} — Evidence: {{path}}
+**Stack**: {{languages, frameworks}} — Evidence: {{path}}
+**Run Locally**: {{commands}}
+**Deployment**: {{method}} — Evidence: {{path}} or **Unknown**
 
 ## 2. Key Risks & Gaps (Top 10)
-
-| # | Risk | Impact | Likelihood | Evidence | Suggested Fix |
-|---|------|--------|------------|----------|---------------|
-| 1 | {risk} | High | High | {path:line} | {fix} |
-| 2 | {risk} | High | Medium | {path} | {fix} |
-...
-
----
+| # | Risk | Impact | Likelihood | Evidence | Fix |
+|---|------|--------|------------|----------|-----|
 
 ## 3. Opportunities
-
-### Quick Wins (≤2 days each)
+### Quick Wins (≤2 days)
 | Opportunity | Outcome | Effort | Files |
 |-------------|---------|--------|-------|
 
@@ -645,270 +246,129 @@ After all agents complete, produce the integrated strategy documents.
 | Opportunity | Outcome | Effort | Risks |
 |-------------|---------|--------|-------|
 
----
+## 4. Roadmap Summary
+See ./strategy/roadmap.md for details.
+- Week 1: {{theme}}
+- Week 2: {{theme}}
+- Weeks 3-6: {{milestones}}
 
-## 4. Roadmap
+## 5. Backlog Summary
+See ./strategy/backlog.md for full list.
+| # | Item | Priority |
+|---|------|----------|
 
-See `./strategy/roadmap.md` for detailed plans.
+## 6. Next Actions
+### Commands to Run
+1. {{command}} — {{reason}}
 
-### 2-Week Summary
-- Week 1: {theme}
-- Week 2: {theme}
-
-### 6-Week Summary
-- Weeks 1-2: {milestone}
-- Weeks 3-4: {milestone}
-- Weeks 5-6: {milestone}
-
----
-
-## 5. Prioritized Backlog
-
-See `./strategy/backlog.md` for full backlog.
-
-**Top 5 Items**:
-| # | Item | Priority Score |
-|---|------|----------------|
-| 1 | {item} | 2.5 |
-...
-
----
-
-## 6. Concrete Next Actions
-
-### Commands to Run Now
-```bash
-# 1. {description}
-{command}
-
-# 2. {description}
-{command}
-```
-
-### Files to Edit First
-1. `{path}` — {reason}
-2. `{path}` — {reason}
+### Files to Edit
+1. {{path}} — {{reason}}
 
 ### First 3 PRs
-
-**PR 1: {Title}**
-- Scope: {description}
-- Files: {list}
-- DoD: {criteria}
-
-**PR 2: {Title}**
-- Scope: {description}
-- Files: {list}
-- DoD: {criteria}
-
-**PR 3: {Title}**
-- Scope: {description}
-- Files: {list}
-- DoD: {criteria}
-
----
+**PR 1**: {{title}}
+- Scope: {{description}}
+- Files: {{list}}
 
 ## 7. Questions & Assumptions
-
-### Questions to Confirm
-1. {question}
-   - Why: {impact}
-   - Assumption if unanswered: {default}
-
-### Standing Assumptions
-1. {assumption}
-2. {assumption}
-
----
+1. {{question}}
+   - Why: {{impact}}
+   - Assumption if unanswered: {{default}}
 
 ## Agent Reports
-
 | Agent | Report | Key Finding |
 |-------|--------|-------------|
-| Architect | [agent-architect.md](./agent-architect.md) | {finding} |
-| Product | [agent-product.md](./agent-product.md) | {finding} |
-| Security | [agent-security.md](./agent-security.md) | {finding} |
-| Operations | [agent-ops.md](./agent-ops.md) | {finding} |
-| Performance | [agent-performance.md](./agent-performance.md) | {finding} |
-| Quality | [agent-quality.md](./agent-quality.md) | {finding} |
-| DX | [agent-dx.md](./agent-dx.md) | {finding} |
-```
+~~~
 
----
+### Step 15: Write backlog.md
 
-### Write `./strategy/backlog.md`
+Use the Write tool to create `./strategy/backlog.md`:
 
-```markdown
+~~~
 # Prioritized Backlog
 
-**Generated**: {timestamp}
+**Scoring**: Priority = Impact / Effort (higher = do first)
 
-## Scoring
-- **Impact**: 1 (Low) to 5 (Critical)
-- **Effort**: 1 (Hours) to 5 (Weeks)
-- **Priority**: Impact / Effort (higher = do first)
+| # | Item | Impact (1-5) | Effort (1-5) | Priority | Deps | Owner | Evidence |
+|---|------|--------------|--------------|----------|------|-------|----------|
 
-## Backlog
-
-| # | Item | Impact | Effort | Priority | Deps | Owner | Evidence |
-|---|------|--------|--------|----------|------|-------|----------|
-| 1 | {item} | 5 | 2 | 2.50 | - | Security | {path} |
-| 2 | {item} | 4 | 2 | 2.00 | - | Quality | {path} |
-| 3 | {item} | 4 | 3 | 1.33 | #1 | Architect | {path} |
-...
-
-## By Owner Role
-
+## By Owner
 ### Security
-- [ ] #{n}: {item}
+- [ ] #N: {{item}}
 
 ### Quality
-- [ ] #{n}: {item}
+- [ ] #N: {{item}}
+~~~
 
-### Architect
-- [ ] #{n}: {item}
+### Step 16: Write roadmap.md
 
-### Operations
-- [ ] #{n}: {item}
+Use the Write tool to create `./strategy/roadmap.md`:
 
-### DX
-- [ ] #{n}: {item}
-```
-
----
-
-### Write `./strategy/roadmap.md`
-
-```markdown
+~~~
 # Roadmap
 
-**Generated**: {timestamp}
+## 2-Week Plan
 
----
-
-## 2-Week Plan (Execution-Ready)
-
-### Week 1: {Theme}
-
-**Milestone**: {description}
-
+### Week 1: {{Theme}}
+**Milestone**: {{description}}
 **Deliverables**:
-- [ ] {deliverable 1}
-- [ ] {deliverable 2}
+- [ ] {{item}}
 
 **PR Slicing**:
-| PR | Title | Scope | Files | Depends On |
-|----|-------|-------|-------|------------|
-| 1 | {title} | {scope} | {files} | - |
-| 2 | {title} | {scope} | {files} | PR 1 |
+| PR | Title | Files | Depends On |
+|----|-------|-------|------------|
 
-**Acceptance Criteria**:
-- [ ] {criterion}
-- [ ] {criterion}
+### Week 2: {{Theme}}
+...
 
----
+## 6-Week Plan
 
-### Week 2: {Theme}
+| Week | Phase | Milestone | Deliverables | Dependencies |
+|------|-------|-----------|--------------|--------------|
+| 1-2 | Foundation | {{milestone}} | {{items}} | None |
+| 3-4 | Hardening | {{milestone}} | {{items}} | Foundation |
+| 5-6 | Scale | {{milestone}} | {{items}} | Hardening |
+~~~
 
-**Milestone**: {description}
+### Step 17: Print Summary
 
-**Deliverables**:
-- [ ] {deliverable 1}
-- [ ] {deliverable 2}
-
-**PR Slicing**:
-| PR | Title | Scope | Files | Depends On |
-|----|-------|-------|-------|------------|
-
-**Acceptance Criteria**:
-- [ ] {criterion}
-
----
-
-## 6-Week Plan (Staged Evolution)
-
-| Week | Phase | Milestone | Key Deliverables | Dependencies | Risk Addressed |
-|------|-------|-----------|------------------|--------------|----------------|
-| 1-2 | Foundation | {milestone} | {deliverables} | None | Quality |
-| 3-4 | Hardening | {milestone} | {deliverables} | Foundation | Security |
-| 5-6 | Scale | {milestone} | {deliverables} | Hardening | Performance |
-
-### Phase Details
-
-#### Weeks 1-2: Foundation
-{description}
-
-#### Weeks 3-4: Hardening
-{description}
-
-#### Weeks 5-6: Scale
-{description}
-
----
-
-## Risk Burndown
-
-| Week | Risks Remaining | Key Risk Addressed |
-|------|-----------------|-------------------|
-| 0 | 10 | - |
-| 2 | 7 | {risk} |
-| 4 | 4 | {risk} |
-| 6 | 2 | {risk} |
-```
-
----
-
-## Final Step — Print Index
-
-After writing all files, print:
-
-```bash
+~~~bash
 echo ""
 echo "=== Strategy Analysis Complete ==="
 echo "Generated files:"
 ls -la ./strategy/
 echo ""
 echo "Start with: cat ./strategy/strategy.md"
-```
+~~~
 
-**Expected Output**:
-```
-./strategy/
-├── .timestamp
-├── repo-map.md
-├── inspected-files.md
-├── agent-architect.md
-├── agent-product.md
-├── agent-security.md
-├── agent-ops.md
-├── agent-performance.md
-├── agent-quality.md
-├── agent-dx.md
-├── strategy.md
-├── backlog.md
-└── roadmap.md
-```
+## Output Files
 
----
+| File | Content |
+|------|---------|
+| repo-map.md | Repository structure and key files |
+| inspected-files.md | List of all files read during analysis |
+| agent-architect.md | Architecture and tech debt analysis |
+| agent-product.md | Product value and documentation gaps |
+| agent-security.md | Security vulnerabilities and risks |
+| agent-ops.md | Deployment and observability |
+| agent-performance.md | Bottlenecks and scalability |
+| agent-quality.md | Testing and CI/CD |
+| agent-dx.md | Developer experience |
+| strategy.md | Integrated strategy report |
+| backlog.md | Prioritized backlog with scoring |
+| roadmap.md | 2-week and 6-week plans |
 
-## Execution Flags (Optional)
+## Guidelines
 
-| Flag | Behavior |
-|------|----------|
-| `--quick` | Phase 0 + Agents A,F,G only |
-| `--security` | Full Phase 0-1, prioritize Agent C |
-| `--dx` | Full Phase 0-1, prioritize Agent G |
-| `--deep` | Extended analysis, all agents with opus |
+1. Every factual claim must reference a specific file path (e.g., `src/auth.ts:42`)
+2. If something cannot be verified, mark it as **Unknown** and propose how to verify
+3. Prefer minimal viable changes over "big rewrite" suggestions
+4. Use PR-sliced execution (small, reviewable PRs)
+5. For sparse repos with few files, focus on what exists rather than leaving sections empty
+6. Run agents in parallel where possible for efficiency
+7. Always create `./strategy/` directory before writing any files
 
-Default: Standard (all agents, balanced depth)
+## References
 
----
-
-## Start Now
-
-1. Run **Phase 0** — create `./strategy/`, gather repo context
-2. Run **Phase 1** — execute all 7 agents, write individual reports
-3. Run **Phase 2** — synthesize into strategy.md, backlog.md, roadmap.md
-4. Print file index
-
-Begin Phase 0 immediately.
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [Semantic Versioning](https://semver.org/)
+- [12 Factor App](https://12factor.net/)
