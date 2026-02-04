@@ -50,3 +50,4 @@ git branch -d {branch_name}
 3. Resolve merge conflicts first if any
 4. If PR body contains `Closes #123` format, issue will be auto-closed
 5. Manually close issue only if auto-close didn't work
+6. **All outputs and status messages must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)

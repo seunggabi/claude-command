@@ -72,3 +72,4 @@ gh release create v{VERSION} --title "v{VERSION}" --notes "## What's Changed
 4. Include meaningful release notes
 5. Link to full changelog for details
 6. Consider pre-release tags (v1.0.0-beta.1) for testing
+7. **All release notes and outputs must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)

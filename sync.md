@@ -57,3 +57,4 @@ git push --force-with-lease
 2. If on main branch, just pull instead of rebase
 3. Resolve conflicts carefully before continuing rebase
 4. Stash is only created if there are uncommitted changes
+5. **All outputs and status messages must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)
