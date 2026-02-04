@@ -30,6 +30,7 @@ gh --version
 **Cause**: GitHub CLI is not authenticated
 
 **Solution**:
+
 ```bash
 # Start authentication
 gh auth login
@@ -47,6 +48,7 @@ gh auth status
 **Cause**: Command files are not in the correct location
 
 **Solution**:
+
 ```bash
 # Check installation location
 ls -la ~/.claude/commands/
@@ -67,11 +69,13 @@ rm -rf /tmp/claude-command
 **Symptom**: Error when running `gh pr create`
 
 **Possible causes**:
+
 - Branch not pushed to remote
 - PR already exists for this branch
 - Insufficient permissions
 
 **Solution**:
+
 ```bash
 # Ensure branch is pushed
 git push -u origin $(git branch --show-current)
@@ -90,6 +94,7 @@ gh auth status
 **Symptom**: Conflicts occur during `/sync`
 
 **Solution**:
+
 ```bash
 # Check conflicting files
 git status
@@ -111,6 +116,7 @@ git rebase --abort
 **Cause**: Remote branch is ahead of local (someone else pushed)
 
 **Solution**:
+
 ```bash
 # Check remote changes
 git fetch origin
@@ -130,6 +136,7 @@ git push --force-with-lease
 **Cause**: Branch is not fully merged
 
 **Solution**:
+
 ```bash
 # Check merge status
 git branch --merged main
@@ -143,6 +150,7 @@ git branch -D {branch_name}
 ## Debugging Tips
 
 ### Check current status
+
 ```bash
 # Git status
 git status
@@ -156,10 +164,12 @@ gh issue list --state open
 ```
 
 ### Check logs
+
 Review the output messages when running commands in Claude Code.
 
 ## Additional Help
 
 If the issue persists:
+
 1. Open an issue at [GitHub Issues](https://github.com/seunggabi/claude-command/issues)
 2. Include error messages and environment information

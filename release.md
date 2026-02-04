@@ -21,12 +21,14 @@ Semantic Versioning: `vMAJOR.MINOR.PATCH`
 ## Execution Steps
 
 ### Step 1: Ensure on main and up-to-date
+
 ```bash
 git checkout main
 git pull origin main
 ```
 
 ### Step 2: Get latest tag
+
 ```bash
 git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"
 ```
@@ -40,18 +42,21 @@ Analyze commits since last tag:
 - `BREAKING CHANGE` or `!:` → MAJOR bump
 
 ### Step 4: Generate changelog
+
 ```bash
 # Get commits since last tag
 git log $(git describe --tags --abbrev=0)..HEAD --oneline --pretty=format:"- %s"
 ```
 
 ### Step 5: Create annotated tag
+
 ```bash
 git tag -a v{VERSION} -m "Release v{VERSION}"
 git push origin v{VERSION}
 ```
 
 ### Step 6: Create GitHub release
+
 ```bash
 gh release create v{VERSION} --title "v{VERSION}" --notes "## What's Changed
 

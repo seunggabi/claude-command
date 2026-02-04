@@ -11,6 +11,7 @@ Generates a formatted changelog from git commits.
 ## Execution Steps
 
 ### Step 1: Get commit range
+
 ```bash
 # From last tag to HEAD
 LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
@@ -23,6 +24,7 @@ fi
 ```
 
 ### Step 2: Collect commits by type
+
 ```bash
 echo "## Features"
 git log $RANGE --oneline --grep="^feat" --pretty=format:"- %s (%h)"
@@ -50,17 +52,21 @@ Generate markdown format:
 ## [Unreleased]
 
 ### Features
+
 - feat: add new feature (#123) (abc1234)
 
 ### Bug Fixes
+
 - fix: resolve issue (#124) (def5678)
 
 ### Refactoring
+
 - refactor: improve performance (ghi9012)
 
 ## [v1.0.0] - 2025-01-15
 
 ### Features
+
 - Initial release
 ```
 
@@ -91,10 +97,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 ### Changed
+
 ### Deprecated
+
 ### Removed
+
 ### Fixed
+
 ### Security
 ```
 

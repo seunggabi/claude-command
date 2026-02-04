@@ -6,11 +6,11 @@ Custom commands for Claude Code CLI.
 
 The following tools must be installed:
 
-| Tool | Min Version | Verify | Install |
-|------|-------------|--------|---------|
-| [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) | - | `claude --version` | [Official Docs](https://docs.anthropic.com/en/docs/claude-code) |
-| [Git](https://git-scm.com/) | 2.0+ | `git --version` | `brew install git` |
-| [GitHub CLI](https://cli.github.com/) | 2.0+ | `gh --version` | `brew install gh` |
+| Tool                                                              | Min Version | Verify             | Install                                                         |
+| ----------------------------------------------------------------- | ----------- | ------------------ | --------------------------------------------------------------- |
+| [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) | -           | `claude --version` | [Official Docs](https://docs.anthropic.com/en/docs/claude-code) |
+| [Git](https://git-scm.com/)                                       | 2.0+        | `git --version`    | `brew install git`                                              |
+| [GitHub CLI](https://cli.github.com/)                             | 2.0+        | `gh --version`     | `brew install gh`                                               |
 
 ### GitHub CLI Authentication
 
@@ -40,6 +40,7 @@ cp -rf .claude/commands/* ~/.claude/commands/
 ```
 
 **One-liner:**
+
 ```bash
 git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp -f /tmp/claude-command/{changelog,cleanup,commit-push-pr,done,release,status,sync}.md ~/.claude/commands/ && cp -rf /tmp/claude-command/.claude/commands/* ~/.claude/commands/ && rm -rf /tmp/claude-command
 ```
@@ -68,16 +69,16 @@ git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command &&
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `/commit-push-pr` | Create issue → branch → commit → push → PR |
-| `/done` | Merge PR → close issue → cleanup |
-| `/sync` | Rebase current branch with main |
-| `/cleanup` | Remove merged local/remote branches |
-| `/status` | Show project status (git, issues, PRs) |
-| `/release` | Create version tag and GitHub release |
-| `/changelog` | Generate changelog from commits |
-| `/strategy` | Multi-agent repo analysis & next-step planning |
+| Command           | Description                                    |
+| ----------------- | ---------------------------------------------- |
+| `/commit-push-pr` | Create issue → branch → commit → push → PR     |
+| `/done`           | Merge PR → close issue → cleanup               |
+| `/sync`           | Rebase current branch with main                |
+| `/cleanup`        | Remove merged local/remote branches            |
+| `/status`         | Show project status (git, issues, PRs)         |
+| `/release`        | Create version tag and GitHub release          |
+| `/changelog`      | Generate changelog from commits                |
+| `/strategy`       | Multi-agent repo analysis & next-step planning |
 
 ### `/commit-push-pr`
 
@@ -196,6 +197,7 @@ Comprehensive multi-agent repository analysis that produces an actionable strate
 ```
 
 Examples:
+
 - `feat/#123_add-login`
 - `fix/#124_fix-auth-bug`
 - `refactor/#125_cleanup-code`
@@ -208,6 +210,7 @@ Examples:
 ```
 
 Examples:
+
 - `(#123) feat: add login feature`
 - `(#124) fix: fix authentication bug`
 
