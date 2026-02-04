@@ -103,6 +103,7 @@ gh pr create --title "(#{issue_number}) {type}: {PR title}" --body "Closes #{iss
 3. Alias should be a short English kebab-case identifier
 4. If not on main branch, skip issue creation and proceed with commit/push/PR on current branch
 5. Use present tense for commit messages ("add" not "added")
+6. **All outputs, issue bodies, and PR descriptions must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)
 
 ## References
 - [Semantic Commit Messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)

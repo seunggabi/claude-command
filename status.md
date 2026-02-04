@@ -67,3 +67,4 @@ Display results in a clean, organized format:
 2. Highlight items that need attention
 3. Show age of issues/PRs if stale (>7 days)
 4. Indicate CI status for open PRs
+5. **All outputs and summaries must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)

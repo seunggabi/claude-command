@@ -57,3 +57,4 @@ git branch -a
 3. Run `git fetch --prune` first to sync remote state
 4. Use `-d` (safe delete) not `-D` (force delete) for local branches
 5. Protected branches on GitHub won't be deleted remotely
+6. **All outputs and confirmations must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)

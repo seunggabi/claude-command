@@ -366,6 +366,7 @@ echo "Start with: cat ./strategy/strategy.md"
 5. For sparse repos with few files, focus on what exists rather than leaving sections empty
 6. Run agents in parallel where possible for efficiency
 7. Always create `./strategy/` directory before writing any files
+8. **All analysis reports and outputs must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)
 
 ## References
 

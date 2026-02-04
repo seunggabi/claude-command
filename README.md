@@ -28,6 +28,7 @@ cd .claude/commands
 curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/commit-push-pr.md
 curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/done.md
 curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/sync.md
+curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/strategy.md
 curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/cleanup.md
 curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/status.md
 curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/release.md
