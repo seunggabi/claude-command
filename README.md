@@ -35,14 +35,14 @@ gh auth status
 git clone https://github.com/seunggabi/claude-command.git
 cd claude-command
 mkdir -p ~/.claude/commands
-cp -f changelog.md cleanup.md commit-push-pr.md done.md release.md status.md sync.md ~/.claude/commands/
+cp -f *.md ~/.claude/commands/
 cp -rf .claude/commands/* ~/.claude/commands/
 ```
 
 **One-liner:**
 
 ```bash
-git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp -f /tmp/claude-command/{changelog,cleanup,commit-push-pr,done,release,status,sync}.md ~/.claude/commands/ && cp -rf /tmp/claude-command/.claude/commands/* ~/.claude/commands/ && rm -rf /tmp/claude-command
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp -f /tmp/claude-command/*.md ~/.claude/commands/ && cp -rf /tmp/claude-command/.claude/commands/* ~/.claude/commands/ && rm -rf /tmp/claude-command
 ```
 
 ### Project-specific Installation
