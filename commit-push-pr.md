@@ -5,6 +5,7 @@ Automatically creates issue, branch, commit, push, and PR.
 ## Conventions Reference
 
 ### Semantic Commit Types
+
 | Type | Description |
 |------|-------------|
 | `feat` | New feature for users |
@@ -19,7 +20,8 @@ Automatically creates issue, branch, commit, push, and PR.
 | `perf` | Performance improvements |
 
 ### Branch Naming Format
-```
+
+```text
 {type}/#{issue_number}_{alias}
 ```
 - Type: `feat`, `fix`, `refactor`, `chore`, etc.
@@ -28,12 +30,14 @@ Automatically creates issue, branch, commit, push, and PR.
 - Separator: `_` between issue number and alias
 
 ### Commit Message Format
-```
+
+```text
 (#{issue_number}) {type}: {description}
 ```
 
 ### PR Title Format
-```
+
+```text
 (#{issue_number}) {type}: {description}
 ```
 
@@ -57,6 +61,7 @@ git diff --stat
 ```
 
 ### Step 2: Analyze changes and determine type
+
 Analyze changes and select appropriate type from the table above.
 
 ### Step 3: Create issue (if on main branch)
@@ -70,6 +75,7 @@ git checkout -b {type}/#{issue_number}_{alias}
 ```
 
 Examples:
+
 - `feat/#123_add-login`
 - `fix/#124_fix-auth-bug`
 - `refactor/#125_cleanup-code`
@@ -82,6 +88,7 @@ git commit -m "(#{issue_number}) {type}: {description}"
 ```
 
 Examples:
+
 - `(#123) feat: add login feature`
 - `(#124) fix: fix authentication bug`
 - `(#125) refactor: cleanup code`

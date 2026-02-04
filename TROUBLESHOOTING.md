@@ -9,6 +9,7 @@
 **Cause**: GitHub CLI is not installed
 
 **Solution**:
+
 ```bash
 # macOS
 brew install gh

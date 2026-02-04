@@ -55,6 +55,7 @@ git log main --oneline --merges -5
 ## Output Format
 
 Display results in a clean, organized format:
+
 - Current branch and status
 - Pending changes count
 - Open issues count with titles

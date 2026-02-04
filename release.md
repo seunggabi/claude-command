@@ -13,6 +13,7 @@ Creates a version tag and GitHub release with changelog.
 ## Version Format
 
 Semantic Versioning: `vMAJOR.MINOR.PATCH`
+
 - MAJOR: Breaking changes
 - MINOR: New features (backwards compatible)
 - PATCH: Bug fixes (backwards compatible)
@@ -31,7 +32,9 @@ git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"
 ```
 
 ### Step 3: Determine version bump type
+
 Analyze commits since last tag:
+
 - `feat:` → MINOR bump
 - `fix:` → PATCH bump
 - `BREAKING CHANGE` or `!:` → MAJOR bump

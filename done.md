@@ -18,6 +18,7 @@ gh pr status
 ```
 
 Extract issue number from branch name:
+
 - `feat/#123_add-login` → `123`
 - `fix/#124_fix-bug` → `124`
 
@@ -28,6 +29,7 @@ gh pr merge --squash --delete-branch
 ```
 
 PR merge options:
+
 - `--squash`: Squash commits into one
 - `--delete-branch`: Delete remote branch after merge
 

@@ -41,6 +41,7 @@ git log $RANGE --oneline --grep="^chore" --pretty=format:"- %s (%h)"
 ```
 
 ### Step 3: Format output
+
 Generate markdown format:
 
 ```markdown
@@ -66,11 +67,13 @@ Generate markdown format:
 ### Step 4: Output options
 
 **To console:**
+
 ```bash
 # Just print to stdout
 ```
 
 **To file:**
+
 ```bash
 # Append to CHANGELOG.md
 ```

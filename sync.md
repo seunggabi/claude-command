@@ -29,7 +29,9 @@ git rebase origin/main
 ```
 
 ### Step 4: Handle conflicts (if any)
+
 If conflicts occur:
+
 ```bash
 # After resolving conflicts manually
 git add .
@@ -37,6 +39,7 @@ git rebase --continue
 ```
 
 To abort rebase:
+
 ```bash
 git rebase --abort
 ```
