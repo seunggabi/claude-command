@@ -4,23 +4,23 @@ Custom commands for Claude Code CLI.
 
 ## Prerequisites
 
-다음 도구들이 설치되어 있어야 합니다:
+The following tools must be installed:
 
-| 도구 | 최소 버전 | 설치 확인 | 설치 방법 |
-|------|----------|----------|----------|
-| [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) | - | `claude --version` | [공식 문서](https://docs.anthropic.com/en/docs/claude-code) |
+| Tool | Min Version | Verify | Install |
+|------|-------------|--------|---------|
+| [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) | - | `claude --version` | [Official Docs](https://docs.anthropic.com/en/docs/claude-code) |
 | [Git](https://git-scm.com/) | 2.0+ | `git --version` | `brew install git` |
 | [GitHub CLI](https://cli.github.com/) | 2.0+ | `gh --version` | `brew install gh` |
 
-### GitHub CLI 인증
+### GitHub CLI Authentication
 
-GitHub CLI가 설치되면 인증이 필요합니다:
+After installing GitHub CLI, authentication is required:
 
 ```bash
 gh auth login
 ```
 
-인증 상태 확인:
+Verify authentication status:
 ```bash
 gh auth status
 ```
