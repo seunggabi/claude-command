@@ -12,31 +12,37 @@ Merges PR and closes related issue.
 ## Execution Steps
 
 ### Step 1: Check current status
+
 ```bash
 git branch --show-current
 gh pr status
 ```
 
 Extract issue number from branch name:
+
 - `feat/#123_add-login` → `123`
 - `fix/#124_fix-bug` → `124`
 
 ### Step 2: Check and merge PR
+
 ```bash
 gh pr view --json number,state,mergeable
 gh pr merge --squash --delete-branch
 ```
 
 PR merge options:
+
 - `--squash`: Squash commits into one
 - `--delete-branch`: Delete remote branch after merge
 
 ### Step 3: Close issue (if not auto-closed by PR)
+
 ```bash
 gh issue close {issue_number}
 ```
 
 ### Step 4: Local cleanup
+
 ```bash
 git checkout main
 git pull origin main

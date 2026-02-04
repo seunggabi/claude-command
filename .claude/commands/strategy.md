@@ -56,13 +56,13 @@ Scan for and READ each file that exists. Mark missing files as "Not Found":
 |----------|----------------|
 | Documentation | README.md, README, docs/, CONTRIBUTING.md, CHANGELOG.md |
 | Package/Build | package.json, pyproject.toml, Cargo.toml, go.mod, pom.xml, build.gradle, Makefile |
-| Config | .env.example, config/, settings/, *.config.js, *.config.ts |
+| Config | .env.example, config/, settings/, *.config.js,*.config.ts |
 | Docker | Dockerfile, docker-compose.yml, .dockerignore |
 | CI/CD | .github/workflows/, .gitlab-ci.yml, Jenkinsfile, .circleci/ |
 | IaC | terraform/, pulumi/, k8s/, helm/ |
 | Database | migrations/, schema.sql, prisma/, alembic/ |
 | Entry Points | main.*, index.*, app.*, server.*, src/main.*, src/index.* |
-| Tests | test/, tests/, __tests__/, spec/ |
+| Tests | test/, tests/, **tests**/, spec/ |
 
 **For repos with minimal files**: If README.md is missing, check for any .md file. If no package manifest exists, infer stack from file extensions.
 
@@ -110,6 +110,7 @@ Use the Write tool to create `./strategy/inspected-files.md`:
 ### Step 7: Run Agent A - Architect
 
 Analyze system and code structure. Focus on:
+
 - Architecture style (monolith, microservices, modular monolith, serverless)
 - Module boundaries and responsibilities
 - Dependency graph (external and internal)
@@ -149,6 +150,7 @@ Write findings to `./strategy/agent-architect.md` with this structure:
 ### Step 8: Run Agent B - Product
 
 Analyze value proposition and documentation. Focus on:
+
 - Problem statement and target users
 - Primary use cases
 - Local run instructions (documented vs actual)
@@ -160,6 +162,7 @@ Write findings to `./strategy/agent-product.md`.
 ### Step 9: Run Agent C - Security
 
 Analyze security posture. Focus on:
+
 - Secrets in repo (scan for API keys, passwords, tokens)
 - Unsafe configurations
 - Dependency vulnerabilities (run npm audit / pip-audit / cargo audit if applicable)
@@ -171,6 +174,7 @@ Write findings to `./strategy/agent-security.md`.
 ### Step 10: Run Agent D - Operations
 
 Analyze deployability and observability. Focus on:
+
 - Deployment method and environments
 - Configuration management
 - Logging, metrics, tracing
@@ -183,6 +187,7 @@ Write findings to `./strategy/agent-ops.md`.
 ### Step 11: Run Agent E - Performance
 
 Analyze bottlenecks and scalability. Focus on:
+
 - Hot paths
 - Database patterns (N+1, missing indexes)
 - Caching strategy
@@ -194,6 +199,7 @@ Write findings to `./strategy/agent-performance.md`.
 ### Step 12: Run Agent F - Quality
 
 Analyze testing and CI. Focus on:
+
 - Test coverage and types (unit/integration/e2e)
 - CI pipeline completeness
 - Static analysis configuration
@@ -205,6 +211,7 @@ Write findings to `./strategy/agent-quality.md`.
 ### Step 13: Run Agent G - DX
 
 Analyze developer experience. Focus on:
+
 - Setup friction (steps to first run)
 - Available scripts
 - Development tooling

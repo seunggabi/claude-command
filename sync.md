@@ -12,24 +12,29 @@ Synchronizes current branch with the latest main branch using rebase.
 ## Execution Steps
 
 ### Step 1: Check current status
+
 ```bash
 git branch --show-current
 git status
 ```
 
 ### Step 2: Stash uncommitted changes (if any)
+
 ```bash
 git stash push -m "sync-temp-stash"
 ```
 
 ### Step 3: Fetch and rebase
+
 ```bash
 git fetch origin main
 git rebase origin/main
 ```
 
 ### Step 4: Handle conflicts (if any)
+
 If conflicts occur:
+
 ```bash
 # After resolving conflicts manually
 git add .
@@ -37,16 +42,19 @@ git rebase --continue
 ```
 
 To abort rebase:
+
 ```bash
 git rebase --abort
 ```
 
 ### Step 5: Restore stashed changes
+
 ```bash
 git stash pop
 ```
 
 ### Step 6: Force push (if needed)
+
 ```bash
 git push --force-with-lease
 ```
