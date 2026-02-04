@@ -12,11 +12,12 @@ git clone https://github.com/seunggabi/claude-command.git
 cd claude-command
 mkdir -p ~/.claude/commands
 cp -f changelog.md cleanup.md commit-push-pr.md done.md release.md status.md sync.md ~/.claude/commands/
+cp -rf .claude/commands/* ~/.claude/commands/
 ```
 
 **One-liner:**
 ```bash
-git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp -f /tmp/claude-command/{changelog,cleanup,commit-push-pr,done,release,status,sync}.md ~/.claude/commands/ && rm -rf /tmp/claude-command
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp -f /tmp/claude-command/{changelog,cleanup,commit-push-pr,done,release,status,sync}.md ~/.claude/commands/ && cp -rf /tmp/claude-command/.claude/commands/* ~/.claude/commands/ && rm -rf /tmp/claude-command
 ```
 
 ### Project-specific Installation
@@ -51,6 +52,7 @@ git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command &&
 | `/status` | Show project status (git, issues, PRs) |
 | `/release` | Create version tag and GitHub release |
 | `/changelog` | Generate changelog from commits |
+| `/strategy` | Multi-agent repo analysis & next-step planning |
 
 ### `/commit-push-pr`
 
@@ -123,6 +125,31 @@ Generates a formatted changelog from git commits.
 1. Determine commit range (from last tag)
 2. Group commits by type
 3. Format as markdown changelog
+
+### `/strategy`
+
+Comprehensive multi-agent repository analysis that produces an actionable strategy for next steps.
+
+**Features:**
+- 7 specialized agents (Architect, Product, Security, Ops, Performance, Quality, DX)
+- Evidence-backed analysis with file path citations
+- Outputs to `./strategy/` directory with 12 structured reports
+
+**Workflow:**
+1. **Phase 0 - Intake**: Scan repo structure, identify key files
+2. **Phase 1 - Analysis**: Run all 7 agents in parallel
+3. **Phase 2 - Synthesis**: Generate strategy, backlog, and roadmap
+
+**Outputs:**
+- `./strategy/strategy.md` - Main strategy report
+- `./strategy/backlog.md` - Prioritized backlog with impact/effort scores
+- `./strategy/roadmap.md` - 2-week and 6-week execution plans
+- `./strategy/agent-*.md` - Individual agent reports
+
+**Flags:**
+- `--quick` - Fast scan (Architect, Quality, DX only)
+- `--security` - Security-focused analysis
+- `--deep` - Extended analysis with all agents
 
 ## Conventions
 
