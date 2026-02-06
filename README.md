@@ -30,7 +30,7 @@ gh auth status
 
 ### Global Installation (Available in all projects)
 
-Installs commands, CLAUDE.md rules, and context monitor hook globally:
+Installs commands, CLAUDE.md rules, and settings globally:
 
 ```bash
 git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && /tmp/claude-command/install.sh --global && rm -rf /tmp/claude-command
@@ -40,7 +40,6 @@ This installs:
 - Commands → `~/.claude/commands/`
 - Settings → `~/.claude/settings.json`
 - Rules → `~/.claude/CLAUDE.md`
-- Context monitor hook → `~/.claude/settings.json` (merged)
 
 ### Project-specific Installation
 
@@ -55,14 +54,6 @@ This installs:
 - Settings → `.claude/settings.json`
 - Rules → `.claude/CLAUDE.md`
 
-### Context Monitor Hook Only
-
-Install only the context monitor hook (no commands or rules):
-
-```bash
-git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && /tmp/claude-command/install.sh --hooks-only && rm -rf /tmp/claude-command
-```
-
 ### Update
 
 Re-run the install command. The installer is idempotent — it replaces the managed block and overwrites commands without affecting other content.
@@ -70,17 +61,13 @@ Re-run the install command. The installer is idempotent — it replaces the mana
 ### Uninstall
 
 ```bash
-# Remove rules block + context monitor hook (preserves other content)
+# Remove rules block (preserves other content)
 ./install.sh --uninstall
 ```
 
 ### How It Works
 
-The installer uses block markers (`<!-- CLAUDE-COMMAND:BEGIN/END -->`) in CLAUDE.md for safe, idempotent operation. The context monitor hook tracks tool call usage per session and warns when approaching context limits.
-
-| Prerequisite | Install |
-|-------------|---------|
-| [jq](https://jqlang.github.io/jq/) | `brew install jq` |
+The installer uses block markers (`<!-- CLAUDE-COMMAND:BEGIN/END -->`) in CLAUDE.md for safe, idempotent operation.
 
 ## Commands
 
