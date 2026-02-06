@@ -78,6 +78,7 @@ The installer uses block markers (`<!-- CLAUDE-COMMAND:BEGIN/END -->`) in CLAUDE
 | `/sync`           | Rebase current branch with main                |
 | `/cleanup`        | Remove merged local/remote branches            |
 | `/status`         | Show project status (git, issues, PRs)         |
+| `/tag`            | Smart version tag with auto semver bump        |
 | `/release`        | Create version tag and GitHub release          |
 | `/changelog`      | Generate changelog from commits                |
 | `/strategy`       | Multi-agent repo analysis & next-step planning |
@@ -138,6 +139,22 @@ Shows comprehensive project status.
 - Open issues and PRs
 - Assigned items
 - Recent merges
+
+### `/tag`
+
+Smart version tagging with automatic semver bump detection.
+
+**Usage:**
+
+- `/tag` - Auto-determine version bump from commits
+- `/tag v2.0.0` - Explicit version
+- `/tag patch` / `minor` / `major` - Force bump type
+
+**Auto-detection:**
+
+- `feat` commits → MINOR bump
+- `fix`, `chore`, etc. → PATCH bump
+- `BREAKING CHANGE` or `!` → MAJOR bump
 
 ### `/release`
 
