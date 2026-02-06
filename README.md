@@ -30,42 +30,57 @@ gh auth status
 
 ### Global Installation (Available in all projects)
 
-```bash
-# Clone and install globally
-git clone https://github.com/seunggabi/claude-command.git
-cd claude-command
-mkdir -p ~/.claude/commands
-cp -f *.md ~/.claude/commands/
-cp -rf .claude/commands/* ~/.claude/commands/
-```
-
-**One-liner:**
+Installs commands, CLAUDE.md rules, and context monitor hook globally:
 
 ```bash
-git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && mkdir -p ~/.claude/commands && cp -f /tmp/claude-command/*.md ~/.claude/commands/ && cp -rf /tmp/claude-command/.claude/commands/* ~/.claude/commands/ && rm -rf /tmp/claude-command
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && /tmp/claude-command/install.sh --global && rm -rf /tmp/claude-command
 ```
+
+This installs:
+- Commands → `~/.claude/commands/`
+- Settings → `~/.claude/settings.json`
+- Rules → `~/.claude/CLAUDE.md`
+- Context monitor hook → `~/.claude/settings.json` (merged)
 
 ### Project-specific Installation
 
+Installs commands, settings, and rules to the current project only:
+
 ```bash
-mkdir -p .claude/commands
-cd .claude/commands
-curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/commit-push-pr.md
-curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/done.md
-curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/sync.md
-curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/strategy.md
-curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/cleanup.md
-curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/status.md
-curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/release.md
-curl -O https://raw.githubusercontent.com/seunggabi/claude-command/main/changelog.md
-cd -
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && /tmp/claude-command/install.sh && rm -rf /tmp/claude-command
+```
+
+This installs:
+- Commands → `.claude/commands/`
+- Settings → `.claude/settings.json`
+- Rules → `.claude/CLAUDE.md`
+
+### Context Monitor Hook Only
+
+Install only the context monitor hook (no commands or rules):
+
+```bash
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && /tmp/claude-command/install.sh --hooks-only && rm -rf /tmp/claude-command
 ```
 
 ### Update
 
+Re-run the install command. The installer is idempotent — it replaces the managed block and overwrites commands without affecting other content.
+
+### Uninstall
+
 ```bash
-git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && cp -f /tmp/claude-command/{changelog,cleanup,commit-push-pr,done,release,status,sync}.md ~/.claude/commands/ && rm -rf /tmp/claude-command
+# Remove rules block + context monitor hook (preserves other content)
+./install.sh --uninstall
 ```
+
+### How It Works
+
+The installer uses block markers (`<!-- CLAUDE-COMMAND:BEGIN/END -->`) in CLAUDE.md for safe, idempotent operation. The context monitor hook tracks tool call usage per session and warns when approaching context limits.
+
+| Prerequisite | Install |
+|-------------|---------|
+| [jq](https://jqlang.github.io/jq/) | `brew install jq` |
 
 ## Commands
 
