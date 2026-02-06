@@ -106,6 +106,79 @@ remove_block() {
   echo "Removed existing CLAUDE-COMMAND block from $file"
 }
 
+# --- Helper: Backup file if it exists and differs ---
+backup_if_conflict() {
+  local target="$1"
+  local source="$2"
+
+  if [[ ! -f "$target" ]]; then
+    return 0
+  fi
+
+  # If contents are identical, no backup needed
+  if diff -q "$source" "$target" > /dev/null 2>&1; then
+    return 0
+  fi
+
+  local bak="${target}.bak"
+  # Append timestamp if .bak already exists
+  if [[ -f "$bak" ]]; then
+    bak="${target}.bak.$(date +%Y%m%d_%H%M%S)"
+  fi
+  cp "$target" "$bak"
+  echo "  Backed up existing file to $bak"
+}
+
+# --- Helper: Deep merge settings.json ---
+merge_settings_json() {
+  local source="$1"
+  local target="$2"
+
+  if [[ ! -f "$target" ]]; then
+    cp "$source" "$target"
+    return 0
+  fi
+
+  # Backup if contents differ
+  backup_if_conflict "$target" "$source"
+
+  local existing
+  existing=$(cat "$target")
+
+  # Merge: deep merge objects, concatenate arrays (deduplicate hook commands)
+  local merged
+  merged=$(jq -s '
+    def deep_merge:
+      if length == 0 then null
+      elif length == 1 then .[0]
+      else
+        .[0] as $a | .[1] as $b |
+        if ($a | type) == "object" and ($b | type) == "object" then
+          ($a | keys) + ($b | keys) | unique | map(
+            . as $k |
+            if ($a | has($k)) and ($b | has($k)) then
+              if ($a[$k] | type) == "object" and ($b[$k] | type) == "object" then
+                {($k): ([$a[$k], $b[$k]] | deep_merge)}
+              elif ($a[$k] | type) == "array" and ($b[$k] | type) == "array" then
+                {($k): ($a[$k] + $b[$k] | unique)}
+              else
+                {($k): $b[$k]}
+              end
+            elif ($b | has($k)) then
+              {($k): $b[$k]}
+            else
+              {($k): $a[$k]}
+            end
+          ) | add
+        else $b
+        end
+      end;
+    deep_merge
+  ' "$target" "$source")
+
+  echo "$merged" | jq '.' > "$target"
+}
+
 # --- Helper: Install commands ---
 install_commands() {
   local target_commands_dir="$1"
@@ -118,6 +191,7 @@ install_commands() {
     local count=0
     for f in "$COMMANDS_DIR"/*.md; do
       [[ -f "$f" ]] || continue
+      backup_if_conflict "$target_commands_dir/$(basename "$f")" "$f"
       cp -f "$f" "$target_commands_dir/"
       count=$((count + 1))
     done
@@ -129,6 +203,7 @@ install_commands() {
     local count=0
     for f in "$CLAUDE_COMMANDS_DIR"/*.md; do
       [[ -f "$f" ]] || continue
+      backup_if_conflict "$target_commands_dir/$(basename "$f")" "$f"
       cp -f "$f" "$target_commands_dir/"
       count=$((count + 1))
     done
@@ -144,6 +219,7 @@ install_hooks() {
 
   # Copy hook script
   mkdir -p "$GLOBAL_HOOKS_DIR"
+  backup_if_conflict "$GLOBAL_HOOKS_DIR/context-monitor.sh" "$HOOK_SOURCE"
   cp "$HOOK_SOURCE" "$GLOBAL_HOOKS_DIR/context-monitor.sh"
   chmod +x "$GLOBAL_HOOKS_DIR/context-monitor.sh"
   echo "  Copied hook script to $GLOBAL_HOOKS_DIR/context-monitor.sh"
@@ -151,6 +227,14 @@ install_hooks() {
   # Merge into global settings.json
   if [[ ! -f "$GLOBAL_SETTINGS" ]]; then
     echo '{}' > "$GLOBAL_SETTINGS"
+  else
+    # Backup existing global settings before modification
+    local bak="${GLOBAL_SETTINGS}.bak"
+    if [[ -f "$bak" ]]; then
+      bak="${GLOBAL_SETTINGS}.bak.$(date +%Y%m%d_%H%M%S)"
+    fi
+    cp "$GLOBAL_SETTINGS" "$bak"
+    echo "  Backed up global settings to $bak"
   fi
 
   local settings
@@ -251,11 +335,11 @@ TARGET_SETTINGS="${TARGET_DIR}/settings.json"
 # Install commands
 install_commands "$TARGET_COMMANDS_DIR"
 
-# Install settings.json
+# Install settings.json (merge, not overwrite)
 if [[ -f "$SOURCE_SETTINGS" ]]; then
   echo "Installing settings.json..."
   mkdir -p "$TARGET_DIR"
-  cp -f "$SOURCE_SETTINGS" "$TARGET_SETTINGS"
+  merge_settings_json "$SOURCE_SETTINGS" "$TARGET_SETTINGS"
   echo "  Installed to $TARGET_SETTINGS"
 fi
 
