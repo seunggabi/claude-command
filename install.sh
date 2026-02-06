@@ -7,32 +7,26 @@ set -euo pipefail
 # Installs:
 #   1. Commands (commands/ + .claude/commands/)
 #   2. CLAUDE.md rules (safe deletion, session logging, context limits)
-#   3. Context monitor hook (global settings.json)
 #
 # Usage:
 #   ./install.sh                     # Install to ./.claude/ (project)
-#   ./install.sh --global            # Install to ~/.claude/ + hooks
-#   ./install.sh --hooks-only        # Only install context monitor hook
-#   ./install.sh --uninstall         # Remove block + hooks
+#   ./install.sh --global            # Install to ~/.claude/
+#   ./install.sh --uninstall         # Remove block
 # ============================================================
 
 BLOCK_BEGIN="<!-- CLAUDE-COMMAND:BEGIN -->"
 BLOCK_END="<!-- CLAUDE-COMMAND:END -->"
-HOOK_MARKER="claude-command:context-monitor"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_FILE="${SCRIPT_DIR}/CLAUDE.md"
 SOURCE_SETTINGS="${SCRIPT_DIR}/settings.json"
-HOOK_SOURCE="${SCRIPT_DIR}/.claude/hooks/context-monitor.sh"
 COMMANDS_DIR="${SCRIPT_DIR}/commands"
 CLAUDE_COMMANDS_DIR="${SCRIPT_DIR}/.claude/commands"
 
 GLOBAL_SETTINGS="$HOME/.claude/settings.json"
-GLOBAL_HOOKS_DIR="$HOME/.claude/hooks"
 
 # --- Parse arguments ---
 UNINSTALL=false
-HOOKS_ONLY=false
 INSTALL_GLOBAL=false
 TARGET_FILE=""
 
@@ -45,16 +39,12 @@ for arg in "$@"; do
       INSTALL_GLOBAL=true
       TARGET_FILE="$HOME/.claude/CLAUDE.md"
       ;;
-    --hooks-only)
-      HOOKS_ONLY=true
-      ;;
     --help|-h)
       echo "Usage: ./install.sh [OPTIONS] [TARGET_PATH]"
       echo ""
       echo "Options:"
-      echo "  --global      Install to ~/.claude/ (CLAUDE.md + commands + hooks)"
-      echo "  --hooks-only  Only install context monitor hook globally"
-      echo "  --uninstall   Remove existing block and hooks"
+      echo "  --global      Install to ~/.claude/ (CLAUDE.md + commands)"
+      echo "  --uninstall   Remove existing block"
       echo "  --help, -h    Show this help message"
       echo ""
       echo "Arguments:"
@@ -70,12 +60,6 @@ done
 # Default target
 if [[ -z "$TARGET_FILE" ]]; then
   TARGET_FILE="./.claude/CLAUDE.md"
-fi
-
-# --- Dependency check ---
-if ! command -v jq &> /dev/null; then
-  echo "Error: jq is required for hooks installation. Install with: brew install jq"
-  exit 1
 fi
 
 # --- Helper: Remove existing CLAUDE.md block ---
@@ -213,109 +197,10 @@ install_commands() {
   echo "  Installed to $target_commands_dir"
 }
 
-# --- Helper: Install context monitor hook globally ---
-install_hooks() {
-  echo "Installing context monitor hook..."
-
-  # Copy hook script
-  mkdir -p "$GLOBAL_HOOKS_DIR"
-  backup_if_conflict "$GLOBAL_HOOKS_DIR/context-monitor.sh" "$HOOK_SOURCE"
-  cp "$HOOK_SOURCE" "$GLOBAL_HOOKS_DIR/context-monitor.sh"
-  chmod +x "$GLOBAL_HOOKS_DIR/context-monitor.sh"
-  echo "  Copied hook script to $GLOBAL_HOOKS_DIR/context-monitor.sh"
-
-  # Merge into global settings.json
-  if [[ ! -f "$GLOBAL_SETTINGS" ]]; then
-    echo '{}' > "$GLOBAL_SETTINGS"
-  else
-    # Backup existing global settings before modification
-    local bak="${GLOBAL_SETTINGS}.bak"
-    if [[ -f "$bak" ]]; then
-      bak="${GLOBAL_SETTINGS}.bak.$(date +%Y%m%d_%H%M%S)"
-    fi
-    cp "$GLOBAL_SETTINGS" "$bak"
-    echo "  Backed up global settings to $bak"
-  fi
-
-  local settings
-  settings=$(cat "$GLOBAL_SETTINGS")
-
-  # Check if our hook already exists
-  if echo "$settings" | jq -e ".hooks.PostToolUse[]? | select(.hooks[]?.command | contains(\"$HOOK_MARKER\") or contains(\"context-monitor\"))" > /dev/null 2>&1; then
-    echo "  Context monitor hook already exists in $GLOBAL_SETTINGS (skipped)"
-    return 0
-  fi
-
-  # Build the new hook entry
-  local hook_entry
-  hook_entry=$(cat <<EOF
-{
-  "_id": "$HOOK_MARKER",
-  "hooks": [
-    {
-      "type": "command",
-      "command": "bash $GLOBAL_HOOKS_DIR/context-monitor.sh"
-    }
-  ]
-}
-EOF
-)
-
-  # Ensure hooks.PostToolUse array exists, then append
-  local updated
-  updated=$(echo "$settings" | jq --argjson entry "$hook_entry" '
-    .hooks //= {} |
-    .hooks.PostToolUse //= [] |
-    .hooks.PostToolUse += [$entry]
-  ')
-
-  echo "$updated" | jq '.' > "$GLOBAL_SETTINGS"
-  echo "  Added context monitor to $GLOBAL_SETTINGS"
-}
-
-# --- Helper: Remove context monitor hook globally ---
-remove_hooks() {
-  if [[ ! -f "$GLOBAL_SETTINGS" ]]; then
-    return 0
-  fi
-
-  local settings
-  settings=$(cat "$GLOBAL_SETTINGS")
-
-  # Remove hook entries containing our marker or context-monitor
-  local updated
-  updated=$(echo "$settings" | jq '
-    if .hooks.PostToolUse then
-      .hooks.PostToolUse |= map(select(
-        (._id // "" | contains("context-monitor") | not) and
-        (.hooks // [] | all(.command // "" | contains("context-monitor") | not))
-      ))
-    else . end
-  ')
-
-  echo "$updated" | jq '.' > "$GLOBAL_SETTINGS"
-
-  # Remove hook script
-  if [[ -f "$GLOBAL_HOOKS_DIR/context-monitor.sh" ]]; then
-    rm "$GLOBAL_HOOKS_DIR/context-monitor.sh"
-  fi
-
-  echo "Removed context monitor hook from global settings"
-}
-
 # --- Uninstall mode ---
 if [[ "$UNINSTALL" == true ]]; then
   remove_block "$TARGET_FILE"
-  remove_hooks
   echo "Uninstall complete."
-  exit 0
-fi
-
-# --- Hooks-only mode ---
-if [[ "$HOOKS_ONLY" == true ]]; then
-  install_hooks
-  echo ""
-  echo "Hooks installation complete."
   exit 0
 fi
 
@@ -364,19 +249,10 @@ cat "$SOURCE_FILE" >> "$TARGET_FILE"
 
 echo "Installed CLAUDE-COMMAND rules to $TARGET_FILE"
 
-# Install hooks globally if --global flag
-if [[ "$INSTALL_GLOBAL" == true ]]; then
-  echo ""
-  install_hooks
-fi
-
 echo ""
 echo "Done! Installed:"
 echo "  - Commands   → $TARGET_COMMANDS_DIR"
 echo "  - Settings   → $TARGET_SETTINGS"
 echo "  - Rules      → $TARGET_FILE"
-if [[ "$INSTALL_GLOBAL" == true ]]; then
-  echo "  - Hooks      → $GLOBAL_SETTINGS"
-fi
 echo ""
 echo "To uninstall: ./install.sh --uninstall ${TARGET_FILE}"
