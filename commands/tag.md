@@ -68,7 +68,7 @@ Scan commit messages in `$RANGE` and apply the **highest applicable** bump:
 
 | Priority | Condition | Bump | Example |
 |----------|-----------|------|---------|
-| 1 | Message contains `BREAKING CHANGE` or type ends with `!` | MAJOR | `feat!: redesign API` |
+| 1 | Message contains BREAKING CHANGE or type ends with ! | MAJOR | feat!: redesign API |
 | 2 | Type is `feat` | MINOR | `(#10) feat: add search` |
 | 3 | Everything else (`fix`, `chore`, `refactor`, `docs`, etc.) | PATCH | `(#11) chore: cleanup` |
 
