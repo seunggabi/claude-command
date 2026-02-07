@@ -6,7 +6,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p .claude/logs && echo '{\"timestamp\":\"'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'\",\"cwd\":\"'$PWD'\",\"tool\":\"'$CLAUDE_TOOL_NAME'\",\"status\":\"success\"}' >> .claude/logs/session.jsonl"
+            "command": "INPUT=$(cat) && TOOL=$(echo \"$INPUT\" | jq -r '.tool_name // \"unknown\"') && CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // .tool_input.file_path // \"\"') && mkdir -p .claude/logs && echo '{\"timestamp\":\"'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'\",\"cwd\":\"'$PWD'\",\"tool\":\"'\"$TOOL\"'\",\"command\":\"'$(echo $CMD | head -c 200 | sed 's/\"/\\\\\"/g')'\" ,\"status\":\"success\"}' >> .claude/logs/session.jsonl"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat) && MSG=$(echo \"$INPUT\" | jq -r '.prompt // \"\"' | head -c 200 | sed 's/\"/\\\\\"/g') && mkdir -p .claude/logs && echo '{\"timestamp\":\"'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'\",\"cwd\":\"'$PWD'\",\"tool\":\"UserPrompt\",\"command\":\"'\"$MSG\"'\",\"status\":\"success\"}' >> .claude/logs/session.jsonl"
           }
         ]
       }
