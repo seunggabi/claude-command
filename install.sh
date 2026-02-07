@@ -5,7 +5,7 @@ set -euo pipefail
 # Claude Command - Installer
 #
 # Installs:
-#   1. Commands (commands/ + .claude/commands/)
+#   1. Commands (.claude/commands/)
 #   2. CLAUDE.md rules (safe deletion, session logging, context limits)
 #
 # Usage:
@@ -19,9 +19,8 @@ BLOCK_END="<!-- CLAUDE-COMMAND:END -->"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_FILE="${SCRIPT_DIR}/CLAUDE.md"
-SOURCE_SETTINGS="${SCRIPT_DIR}/settings.json"
-COMMANDS_DIR="${SCRIPT_DIR}/commands"
-CLAUDE_COMMANDS_DIR="${SCRIPT_DIR}/.claude/commands"
+SOURCE_SETTINGS="${SCRIPT_DIR}/.claude/settings.json"
+COMMANDS_DIR="${SCRIPT_DIR}/.claude/commands"
 
 GLOBAL_SETTINGS="$HOME/.claude/settings.json"
 
@@ -170,22 +169,9 @@ install_commands() {
   echo "Installing commands..."
   mkdir -p "$target_commands_dir"
 
-  # Copy from commands/ directory
   if [[ -d "$COMMANDS_DIR" ]]; then
     local count=0
     for f in "$COMMANDS_DIR"/*.md; do
-      [[ -f "$f" ]] || continue
-      backup_if_conflict "$target_commands_dir/$(basename "$f")" "$f"
-      cp -f "$f" "$target_commands_dir/"
-      count=$((count + 1))
-    done
-    echo "  Copied $count commands from commands/"
-  fi
-
-  # Copy from .claude/commands/ directory
-  if [[ -d "$CLAUDE_COMMANDS_DIR" ]]; then
-    local count=0
-    for f in "$CLAUDE_COMMANDS_DIR"/*.md; do
       [[ -f "$f" ]] || continue
       backup_if_conflict "$target_commands_dir/$(basename "$f")" "$f"
       cp -f "$f" "$target_commands_dir/"

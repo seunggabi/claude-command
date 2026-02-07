@@ -33,7 +33,7 @@ gh auth status
 Installs commands, CLAUDE.md rules, and settings globally:
 
 ```bash
-git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && /tmp/claude-command/install.sh --global && rm -rf /tmp/claude-command
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && /tmp/claude-command/install.sh --global
 ```
 
 This installs:
@@ -46,7 +46,7 @@ This installs:
 Installs commands, settings, and rules to the current project only:
 
 ```bash
-git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && /tmp/claude-command/install.sh && rm -rf /tmp/claude-command
+git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command && /tmp/claude-command/install.sh
 ```
 
 This installs:
