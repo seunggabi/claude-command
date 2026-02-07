@@ -69,6 +69,30 @@ Re-run the install command. The installer is idempotent — it replaces the mana
 
 The installer uses block markers (`<!-- CLAUDE-COMMAND:BEGIN/END -->`) in CLAUDE.md for safe, idempotent operation.
 
+## Settings
+
+### Session Logging (Hooks)
+
+The `settings.json` includes a `UserPromptSubmit` hook that logs every user prompt to a session-specific file.
+
+**Log location:** `.claude/logs/{session_id}.jsonl`
+
+Each session gets its own log file, making it easy to track conversation history per session.
+
+**Log format:**
+
+```json
+{"timestamp":"2025-01-01T00:00:00.000Z","cwd":"/path/to/project","tool":"UserPrompt","command":"user message here","status":"success"}
+```
+
+| Field       | Description              |
+| ----------- | ------------------------ |
+| `timestamp` | UTC timestamp            |
+| `cwd`       | Working directory        |
+| `tool`      | `UserPrompt`             |
+| `command`   | User message (max 200ch) |
+| `status`    | `success`                |
+
 ## Commands
 
 | Command           | Description                                    |
