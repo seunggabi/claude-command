@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p .claude/logs && echo '{\"timestamp\":\"'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'\",\"cwd\":\"'$PWD'\",\"tool\":\"'$CLAUDE_TOOL_NAME'\",\"status\":\"success\"}' >> .claude/logs/session.jsonl"
+          }
+        ]
+      }
+    ]
+  }
+}
