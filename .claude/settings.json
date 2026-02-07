@@ -1,16 +1,5 @@
 {
   "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Bash|Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "INPUT=$(cat) && SID=$(echo \"$INPUT\" | jq -r '.session_id // \"unknown\"') && TOOL=$(echo \"$INPUT\" | jq -r '.tool_name // \"unknown\"') && CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // .tool_input.file_path // \"\"') && mkdir -p .claude/logs && echo '{\"timestamp\":\"'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'\",\"cwd\":\"'$PWD'\",\"tool\":\"'\"$TOOL\"'\",\"command\":\"'$(echo $CMD | head -c 200 | sed 's/\"/\\\\\"/g')'\" ,\"status\":\"success\"}' >> .claude/logs/$SID.jsonl"
-          }
-        ]
-      }
-    ],
     "UserPromptSubmit": [
       {
         "hooks": [
