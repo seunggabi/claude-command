@@ -6,7 +6,7 @@ set -euo pipefail
 #
 # Installs:
 #   1. Commands (.claude/commands/)
-#   2. CLAUDE.md rules (safe deletion, session logging, context limits)
+#   2. CLAUDE.md rules (safe deletion, context limits)
 #
 # Usage:
 #   ./install.sh                     # Install to ./.claude/ (project)
