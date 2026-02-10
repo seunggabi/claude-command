@@ -97,16 +97,16 @@ Each session gets its own log file, making it easy to track conversation history
 
 | Command           | Description                                    |
 | ----------------- | ---------------------------------------------- |
-| `/commit-push-pr`          | Create issue → branch → commit → push → PR              |
-| `/done`                    | Merge PR → close issue → cleanup                        |
-| `/commit-push-pr_done_tag` | Full release cycle: PR → merge → tag (with 3x retry)   |
-| `/sync`                    | Rebase current branch with main                         |
-| `/cleanup`                 | Remove merged local/remote branches                     |
-| `/status`                  | Show project status (git, issues, PRs)                  |
-| `/tag`                     | Smart version tag with auto semver bump                 |
-| `/release`                 | Create version tag and GitHub release                   |
-| `/changelog`               | Generate changelog from commits                         |
-| `/strategy`                | Multi-agent repo analysis & next-step planning          |
+| `/commit-push-pr` | Create issue → branch → commit → push → PR            |
+| `/done`           | Merge PR → close issue → cleanup                      |
+| `/cppdt`          | Full release cycle: PR → merge → tag (with 3x retry)  |
+| `/sync`           | Rebase current branch with main                       |
+| `/cleanup`        | Remove merged local/remote branches                   |
+| `/status`         | Show project status (git, issues, PRs)                |
+| `/tag`            | Smart version tag with auto semver bump               |
+| `/release`        | Create version tag and GitHub release                 |
+| `/changelog`      | Generate changelog from commits                       |
+| `/strategy`       | Multi-agent repo analysis & next-step planning        |
 
 ### `/commit-push-pr`
 
@@ -132,7 +132,7 @@ Merges PR and closes related issue.
 3. Close issue (if not auto-closed)
 4. Checkout main, pull, delete local branch
 
-### `/commit-push-pr_done_tag`
+### `/cppdt`
 
 Full release cycle in one command: `/commit-push-pr` → `/done` → `/tag` sequentially.
 
@@ -146,9 +146,9 @@ Full release cycle in one command: `/commit-push-pr` → `/done` → `/tag` sequ
 
 **Usage:**
 
-- `/commit-push-pr_done_tag` - Auto-determine version bump
-- `/commit-push-pr_done_tag major` - Force major bump
-- `/commit-push-pr_done_tag v2.0.0` - Explicit version
+- `/cppdt` - Auto-determine version bump
+- `/cppdt major` - Force major bump
+- `/cppdt v2.0.0` - Explicit version
 
 ### `/sync`
 
