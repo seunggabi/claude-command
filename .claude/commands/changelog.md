@@ -117,4 +117,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 4. Order: Features, Fixes, Refactoring, Docs, Chores
 5. Use [Keep a Changelog](https://keepachangelog.com) format
 6. Date format: YYYY-MM-DD
-7. **All outputs and summaries must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)
+7. **All outputs and summaries must be written in English**
