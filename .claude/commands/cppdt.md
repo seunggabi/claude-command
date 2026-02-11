@@ -104,7 +104,7 @@ Phase N: Attempt 1
 3. If PR is not mergeable (CI failing, review needed), retry with appropriate fix
 4. Follow all conventions from individual commands (commit format, branch naming, etc.)
 5. The `/tag` argument can be passed to this command to override auto-detection (e.g., `/commit-push-pr_done_tag major`)
-6. **All outputs must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)
+6. **All outputs must be written in English**
 
 ## Error Handling
 

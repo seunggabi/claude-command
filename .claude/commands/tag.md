@@ -136,7 +136,7 @@ gh release create {NEW_TAG} --title "{NEW_TAG}" --notes "{release_notes}"
 5. Merge commits (e.g., `Merge pull request #N`) should be excluded from changelog entries
 6. Release notes should group commits cleanly with no empty sections
 7. Include the full changelog comparison link at the bottom
-8. **All release notes and outputs must be written in the user's configured language** (check CLAUDE.md or system settings for language preference)
+8. **All release notes and outputs must be written in English**
 
 ## Examples
 
