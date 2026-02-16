@@ -11,6 +11,7 @@ The following tools must be installed:
 | [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) | -           | `claude --version` | [Official Docs](https://docs.anthropic.com/en/docs/claude-code) |
 | [Git](https://git-scm.com/)                                       | 2.0+        | `git --version`    | `brew install git`                                              |
 | [GitHub CLI](https://cli.github.com/)                             | 2.0+        | `gh --version`     | `brew install gh`                                               |
+| [Node.js](https://nodejs.org/) (for skills)                       | 16.0+       | `node --version`   | `brew install node`                                             |
 
 ### GitHub CLI Authentication
 
@@ -38,6 +39,7 @@ git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command &&
 
 This installs:
 - Commands → `~/.claude/commands/`
+- Skills → Claude Code Skills (obra/superpowers, blader/humanizer, nextlevelbuilder/ui-ux-pro-max-skill, vercel-labs/skills)
 - Settings → `~/.claude/settings.json`
 - Rules → `~/.claude/CLAUDE.md`
 
@@ -51,6 +53,7 @@ git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command &&
 
 This installs:
 - Commands → `.claude/commands/`
+- Skills → Claude Code Skills (obra/superpowers, blader/humanizer, nextlevelbuilder/ui-ux-pro-max-skill, vercel-labs/skills)
 - Settings → `.claude/settings.json`
 - Rules → `.claude/CLAUDE.md`
 
@@ -64,6 +67,19 @@ Re-run the install command. The installer is idempotent — it replaces the mana
 # Remove rules block (preserves other content)
 ./install.sh --uninstall
 ```
+
+### Installed Skills
+
+The installer automatically adds the following Claude Code skills:
+
+| Skill                                | Description                                      |
+| ------------------------------------ | ------------------------------------------------ |
+| `obra/superpowers`                   | Enhanced capabilities and workflow automation    |
+| `blader/humanizer`                   | Natural language improvements                    |
+| `nextlevelbuilder/ui-ux-pro-max-skill` | Advanced UI/UX development                      |
+| `vercel-labs/skills`                 | Vercel's official skill collection               |
+
+**Note:** If `npx` is not available, the installer will skip skills and display manual installation instructions.
 
 ### How It Works
 

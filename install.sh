@@ -183,6 +183,44 @@ install_commands() {
   echo "  Installed to $target_commands_dir"
 }
 
+# --- Helper: Install skills ---
+install_skills() {
+  echo "Installing skills..."
+
+  # Check if npx is available
+  if ! command -v npx &> /dev/null; then
+    echo "  Warning: npx not found. Skipping skills installation."
+    echo "  To install skills manually, run:"
+    echo "    npx skills add obra/superpowers"
+    echo "    npx skills add blader/humanizer"
+    echo "    npx skills add nextlevelbuilder/ui-ux-pro-max-skill"
+    echo "    npx skills add vercel-labs/skills"
+    return 0
+  fi
+
+  local skills=(
+    "obra/superpowers"
+    "blader/humanizer"
+    "nextlevelbuilder/ui-ux-pro-max-skill"
+    "vercel-labs/skills"
+  )
+
+  local installed=0
+  local failed=0
+
+  for skill in "${skills[@]}"; do
+    echo "  Installing $skill..."
+    if npx skills add "$skill" 2>&1 | grep -q "Added\|already installed"; then
+      installed=$((installed + 1))
+    else
+      echo "    Warning: Failed to install $skill"
+      failed=$((failed + 1))
+    fi
+  done
+
+  echo "  Skills installation complete: $installed installed, $failed failed"
+}
+
 # --- Uninstall mode ---
 if [[ "$UNINSTALL" == true ]]; then
   remove_block "$TARGET_FILE"
@@ -205,6 +243,9 @@ TARGET_SETTINGS="${TARGET_DIR}/settings.json"
 
 # Install commands
 install_commands "$TARGET_COMMANDS_DIR"
+
+# Install skills
+install_skills
 
 # Install settings.json (merge, not overwrite)
 if [[ -f "$SOURCE_SETTINGS" ]]; then
@@ -238,6 +279,7 @@ echo "Installed CLAUDE-COMMAND rules to $TARGET_FILE"
 echo ""
 echo "Done! Installed:"
 echo "  - Commands   → $TARGET_COMMANDS_DIR"
+echo "  - Skills     → Claude Code Skills"
 echo "  - Settings   → $TARGET_SETTINGS"
 echo "  - Rules      → $TARGET_FILE"
 echo ""
