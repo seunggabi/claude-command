@@ -121,11 +121,11 @@ Phase N: Attempt 1
 
 ```bash
 # Full cycle with auto-detection
-/commit-push-pr_done_tag
+/cppdt
 
 # Full cycle with forced major version bump
-/commit-push-pr_done_tag major
+/cppdt
 
 # Full cycle with explicit version
-/commit-push-pr_done_tag v2.0.0
+/cppdt v2.0.0
 ```
