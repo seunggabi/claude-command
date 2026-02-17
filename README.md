@@ -2,6 +2,14 @@
 
 Custom commands for Claude Code CLI.
 
+```shell
+./model.sh sonnet
+```
+
+```shell
+./model.sh haiku
+```
+
 ## Prerequisites
 
 The following tools must be installed:
