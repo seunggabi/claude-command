@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
 # ============================================================
 # Claude Command - Installer
@@ -7,6 +7,8 @@ set -euo pipefail
 # Installs:
 #   1. Commands (.claude/commands/)
 #   2. CLAUDE.md rules (safe deletion, context limits)
+#   3. settings.json (backup + deep merge)
+#   4. Skills (skip if already installed)
 #
 # Usage:
 #   ./install.sh                     # Install to ./.claude/ (project)
@@ -94,30 +96,21 @@ remove_block() {
   mv "${temp_file}.clean" "$file"
   rm -f "$temp_file"
 
-  echo "Removed existing CLAUDE-COMMAND block from $file"
+  echo "  Removed existing CLAUDE-COMMAND block from $file"
 }
 
-# --- Helper: Backup file if it exists and differs ---
-backup_if_conflict() {
+# --- Helper: Backup file with timestamp ---
+backup_file() {
   local target="$1"
-  local source="$2"
-
-  if [[ ! -f "$target" ]]; then
-    return 0
-  fi
-
-  # If contents are identical, no backup needed
-  if diff -q "$source" "$target" > /dev/null 2>&1; then
-    return 0
-  fi
-
   local bak="${target}.bak"
+
   # Append timestamp if .bak already exists
   if [[ -f "$bak" ]]; then
     bak="${target}.bak.$(date +%Y%m%d_%H%M%S)"
   fi
+
   cp "$target" "$bak"
-  echo "  Backed up existing file to $bak"
+  echo "  Backed up → $bak"
 }
 
 # --- Helper: Deep merge settings.json ---
@@ -127,18 +120,29 @@ merge_settings_json() {
 
   if [[ ! -f "$target" ]]; then
     cp "$source" "$target"
+    echo "  ✓ Created $target"
     return 0
   fi
 
-  # Backup if contents differ
-  backup_if_conflict "$target" "$source"
+  # Skip if identical
+  if diff -q "$source" "$target" > /dev/null 2>&1; then
+    echo "  ⟳ settings.json already up to date, skipping"
+    return 0
+  fi
 
-  local existing
-  existing=$(cat "$target")
+  # Backup before merge
+  backup_file "$target"
 
-  # Merge: deep merge objects, concatenate arrays (deduplicate hook commands)
+  # Check jq is available
+  if ! command -v jq &> /dev/null; then
+    echo "  ✗ jq not found — copying source over target"
+    cp "$source" "$target"
+    return 0
+  fi
+
+  # Deep merge: objects merged recursively, arrays concatenated + deduplicated
   local merged
-  merged=$(jq -s '
+  if merged=$(jq -s '
     def deep_merge:
       if length == 0 then null
       elif length == 1 then .[0]
@@ -165,56 +169,108 @@ merge_settings_json() {
         end
       end;
     deep_merge
-  ' "$target" "$source")
-
-  echo "$merged" | jq '.' > "$target"
+  ' "$target" "$source" 2>&1); then
+    echo "$merged" | jq '.' > "$target"
+    echo "  ✓ Merged settings.json"
+  else
+    echo "  ✗ jq merge failed — keeping backup, target unchanged"
+  fi
 }
 
 # --- Helper: Install commands ---
 install_commands() {
   local target_commands_dir="$1"
+  local installed=0 skipped=0 updated=0 failed=0
 
   echo "Installing commands..."
-  mkdir -p "$target_commands_dir"
+  mkdir -p "$target_commands_dir" || { echo "  ✗ Failed to create $target_commands_dir"; return; }
 
   if [[ -d "$COMMANDS_DIR" ]]; then
-    local count=0
     for f in "$COMMANDS_DIR"/*.md; do
       [[ -f "$f" ]] || continue
-      backup_if_conflict "$target_commands_dir/$(basename "$f")" "$f"
-      cp -f "$f" "$target_commands_dir/"
-      count=$((count + 1))
+      local name
+      name="$(basename "$f")"
+      local target_file="${target_commands_dir}/${name}"
+
+      if [[ -f "$target_file" ]]; then
+        if diff -q "$f" "$target_file" > /dev/null 2>&1; then
+          echo "  ⟳ $name (already up to date)"
+          skipped=$((skipped + 1))
+          continue
+        else
+          backup_file "$target_file"
+          echo "  ↑ $name (updated)"
+          updated=$((updated + 1))
+        fi
+      else
+        echo "  ✓ $name (installed)"
+        installed=$((installed + 1))
+      fi
+
+      if ! cp -f "$f" "$target_commands_dir/"; then
+        echo "  ✗ $name (failed to copy)"
+        failed=$((failed + 1))
+      fi
     done
-    echo "  Copied $count commands from .claude/commands/"
   fi
 
-  echo "  Installed to $target_commands_dir"
+  echo "  Commands: ${installed} installed, ${skipped} skipped, ${updated} updated, ${failed} failed"
+  echo "  → $target_commands_dir"
 }
 
 # --- Helper: Install skills ---
 install_skills() {
+  local installed=0 skipped=0 failed=0
+  local skills_dir="$HOME/.agents/skills"
+
   echo "Installing skills..."
 
   if ! command -v npx &> /dev/null; then
-    echo "  Warning: npx not found. Skipping skills installation."
-    echo "  To install skills manually:"
-    printf '    npx skills add %s\n' "${SKILLS[@]}"
+    echo "  ✗ npx not found — skipping skills"
+    echo "  To install manually:"
+    printf '    npx skills add -y -g %s\n' "${SKILLS[@]}"
     return 0
   fi
 
-  local installed=0 failed=0
-
   for skill in "${SKILLS[@]}"; do
-    echo "  Installing $skill..."
-    if npx skills add "$skill" 2>&1 | grep -q "Added\|already installed"; then
-      ((installed++))
+    # Snapshot installed skill dirs before
+    local before=()
+    if [[ -d "$skills_dir" ]]; then
+      while IFS= read -r -d '' d; do
+        before+=("$d")
+      done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+    fi
+
+    local output exit_code
+    output=$(npx skills add -y -g "$skill" 2>&1)
+    exit_code=$?
+
+    if [[ $exit_code -ne 0 ]]; then
+      echo "  ✗ $skill (failed, exit $exit_code)"
+      printf '    %s\n' "$(echo "$output" | tail -3)"
+      failed=$((failed + 1))
+      continue
+    fi
+
+    # Snapshot after and compare
+    local after=()
+    if [[ -d "$skills_dir" ]]; then
+      while IFS= read -r -d '' d; do
+        after+=("$d")
+      done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+    fi
+
+    local new_count=$(( ${#after[@]} - ${#before[@]} ))
+    if [[ $new_count -gt 0 ]]; then
+      echo "  ✓ $skill (+${new_count} skill(s) installed)"
+      installed=$((installed + 1))
     else
-      echo "    Warning: Failed to install $skill"
-      ((failed++))
+      echo "  ⟳ $skill (already installed)"
+      skipped=$((skipped + 1))
     fi
   done
 
-  echo "  Skills: $installed installed, $failed failed"
+  echo "  Skills: ${installed} installed, ${skipped} skipped, ${failed} failed"
 }
 
 # --- Uninstall mode ---
@@ -239,22 +295,25 @@ TARGET_SETTINGS="${TARGET_DIR}/settings.json"
 
 # Install commands
 install_commands "$TARGET_COMMANDS_DIR"
+echo ""
 
 # Install skills
 install_skills
+echo ""
 
-# Install settings.json (merge, not overwrite)
+# Install settings.json (backup + merge)
 if [[ -f "$SOURCE_SETTINGS" ]]; then
   echo "Installing settings.json..."
   mkdir -p "$TARGET_DIR"
   merge_settings_json "$SOURCE_SETTINGS" "$TARGET_SETTINGS"
-  echo "  Installed to $TARGET_SETTINGS"
+  echo ""
 fi
 
 # Create target directory if needed
 mkdir -p "$TARGET_DIR"
 
 # Remove existing block (idempotent)
+echo "Installing CLAUDE.md rules..."
 remove_block "$TARGET_FILE"
 
 # Touch file if it doesn't exist
@@ -269,14 +328,13 @@ fi
 
 # Append source content (which already contains block markers)
 cat "$SOURCE_FILE" >> "$TARGET_FILE"
-
-echo "Installed CLAUDE-COMMAND rules to $TARGET_FILE"
+echo "  ✓ Rules installed → $TARGET_FILE"
 
 echo ""
-echo "Done! Installed:"
-echo "  - Commands   → $TARGET_COMMANDS_DIR"
-echo "  - Skills     → Claude Code Skills"
-echo "  - Settings   → $TARGET_SETTINGS"
-echo "  - Rules      → $TARGET_FILE"
+echo "Done!"
+echo "  Commands  → $TARGET_COMMANDS_DIR"
+echo "  Skills    → Claude Code Skills"
+echo "  Settings  → $TARGET_SETTINGS"
+echo "  Rules     → $TARGET_FILE"
 echo ""
 echo "To uninstall: ./install.sh --uninstall ${TARGET_FILE}"
