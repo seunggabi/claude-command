@@ -3,7 +3,7 @@
 SETTINGS="$HOME/.claude/settings.json"
 
 HAIKU=${HAIKU:-"claude-haiku-3-5-20251001"}
-SONNET=${SONNET:-"claude-sonnet-4-5-20250929"}
+SONNET=${SONNET:-"claude-sonnet-4-6"}
 OPUS=${OPUS:-"claude-opus-4-6"}
 
 set_model() {
