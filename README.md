@@ -4,16 +4,13 @@ Custom commands for Claude Code CLI.
 
 ## Model
 
-```shell
-./model.sh opus
-```
+Switch between Claude models:
 
 ```shell
-./model.sh sonnet
-```
-
-```shell
-./model.sh haiku
+./model.sh sonnet    # Switch to Sonnet 4.6
+./model.sh opus      # Switch to Opus 4.6
+./model.sh haiku     # Switch to Haiku 3.5
+./model.sh show      # Show current model
 ```
 
 ## Prerequisites
