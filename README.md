@@ -2,6 +2,12 @@
 
 Custom commands for Claude Code CLI.
 
+## Model
+
+```shell
+./model.sh opus
+```
+
 ```shell
 ./model.sh sonnet
 ```
@@ -76,46 +82,11 @@ Re-run the install command. The installer is idempotent — it replaces the mana
 ./install.sh --uninstall
 ```
 
-### Installed Skills
-
-The installer automatically adds the following Claude Code skills:
-
-| Skill                                | Description                                      |
-| ------------------------------------ | ------------------------------------------------ |
-| `obra/superpowers`                   | Enhanced capabilities and workflow automation    |
-| `blader/humanizer`                   | Natural language improvements                    |
-| `nextlevelbuilder/ui-ux-pro-max-skill` | Advanced UI/UX development                      |
-| `vercel-labs/skills`                 | Vercel's official skill collection               |
-
-**Note:** If `npx` is not available, the installer will skip skills and display manual installation instructions.
-
-### How It Works
-
-The installer uses block markers (`<!-- CLAUDE-COMMAND:BEGIN/END -->`) in CLAUDE.md for safe, idempotent operation.
+**Note:** The installer automatically adds Claude Code skills (superpowers, humanizer, ui-ux-pro-max, vercel-labs). If `npx` is not available, manual installation instructions will be displayed.
 
 ## Settings
 
-### Session Logging (Hooks)
-
-The `settings.json` includes a `UserPromptSubmit` hook that logs every user prompt to a session-specific file.
-
-**Log location:** `.claude/logs/{session_id}.jsonl`
-
-Each session gets its own log file, making it easy to track conversation history per session.
-
-**Log format:**
-
-```json
-{"timestamp":"2025-01-01T00:00:00.000Z","cwd":"/path/to/project","tool":"UserPrompt","command":"user message here","status":"success"}
-```
-
-| Field       | Description              |
-| ----------- | ------------------------ |
-| `timestamp` | UTC timestamp            |
-| `cwd`       | Working directory        |
-| `tool`      | `UserPrompt`             |
-| `command`   | User message (max 200ch) |
-| `status`    | `success`                |
+Session logs are automatically saved to `.claude/logs/{session_id}.jsonl` via `UserPromptSubmit` hook.
 
 ## Commands
 
@@ -134,145 +105,57 @@ Each session gets its own log file, making it easy to track conversation history
 
 ### `/commit-push-pr`
 
-Automatically creates issue, branch, commit, push, and PR.
+Analyzes changes → creates issue → creates branch → commits → pushes → creates PR.
 
-**Workflow:**
-
-1. Check current branch (if on main)
-2. Analyze changes and determine type (feat/fix/refactor/chore)
-3. Create GitHub issue
-4. Create branch: `{type}/#{issue_number}_{alias}`
-5. Commit: `(#{issue_number}) {type}: {description}`
-6. Push and create PR
+Format: `{type}/#{issue_number}_{alias}` → `(#{issue_number}) {type}: {description}`
 
 ### `/done`
 
-Merges PR and closes related issue.
-
-**Workflow:**
-
-1. Extract issue number from current branch
-2. Squash merge PR
-3. Close issue (if not auto-closed)
-4. Checkout main, pull, delete local branch
+Merges PR (squash) → closes issue → cleans up local branch.
 
 ### `/cppdt`
 
-Full release cycle in one command: `/commit-push-pr` → `/done` → `/tag` sequentially.
+Full release cycle: `/commit-push-pr` → `/done` → `/tag`.
 
-**Workflow:**
+Each phase retries up to 3 times on failure.
 
-1. **Phase 1**: Create issue → branch → commit → push → PR
-2. **Phase 2**: Squash merge PR → close issue → checkout main
-3. **Phase 3**: Auto version tag → GitHub release
-
-**Retry Policy:** Each phase retries up to 3 times on failure before aborting.
-
-**Usage:**
-
-- `/cppdt` - Auto-determine version bump
-- `/cppdt major` - Force major bump
-- `/cppdt v2.0.0` - Explicit version
+**Usage:** `/cppdt` | `/cppdt major` | `/cppdt v2.0.0`
 
 ### `/sync`
 
-Synchronizes current branch with the latest main branch using rebase.
-
-**Workflow:**
-
-1. Stash uncommitted changes
-2. Fetch latest and rebase on main
-3. Handle conflicts if any
-4. Restore stash and force push
+Rebases current branch with main (stash → fetch → rebase → restore → force push).
 
 ### `/cleanup`
 
-Removes merged local and remote branches.
-
-**Workflow:**
-
-1. Switch to main and update
-2. Fetch and prune remote
-3. Delete local merged branches
-4. Delete remote merged branches (with confirmation)
+Removes merged local and remote branches (with confirmation).
 
 ### `/status`
 
-Shows comprehensive project status.
-
-**Displays:**
-
-- Git status and recent commits
-- Open issues and PRs
-- Assigned items
-- Recent merges
+Shows git status, recent commits, open issues/PRs, and assigned items.
 
 ### `/tag`
 
-Smart version tagging with automatic semver bump detection.
+Auto version bump from commits or explicit version.
 
-**Usage:**
+**Usage:** `/tag` | `/tag v2.0.0` | `/tag patch|minor|major`
 
-- `/tag` - Auto-determine version bump from commits
-- `/tag v2.0.0` - Explicit version
-- `/tag patch` / `minor` / `major` - Force bump type
-
-**Auto-detection:**
-
-- `feat` commits → MINOR bump
-- `fix`, `chore`, etc. → PATCH bump
-- `BREAKING CHANGE` or `!` → MAJOR bump
+**Auto-detection:** `feat` → MINOR, `fix/chore` → PATCH, `BREAKING` → MAJOR
 
 ### `/release`
 
-Creates a version tag and GitHub release.
-
-**Workflow:**
-
-1. Ensure on main and up-to-date
-2. Determine version bump (semver)
-3. Generate changelog
-4. Create annotated tag
-5. Create GitHub release with notes
+Creates annotated tag and GitHub release with generated changelog.
 
 ### `/changelog`
 
-Generates a formatted changelog from git commits.
-
-**Workflow:**
-
-1. Determine commit range (from last tag)
-2. Group commits by type
-3. Format as markdown changelog
+Generates markdown changelog grouped by commit type.
 
 ### `/strategy`
 
-Comprehensive multi-agent repository analysis that produces an actionable strategy for next steps.
+Multi-agent repo analysis with 7 specialized agents.
 
-**Features:**
+Outputs to `./strategy/` with strategy, backlog, and roadmap.
 
-- 7 specialized agents (Architect, Product, Security, Ops, Performance, Quality, DX)
-- Evidence-backed analysis with file path citations
-- Outputs to `./strategy/` directory with 12 structured reports
-
-**Workflow:**
-
-1. **Phase 0 - Intake**: Scan repo structure, identify key files
-2. **Phase 1 - Analysis**: Run all 7 agents in parallel
-3. **Phase 2 - Synthesis**: Generate strategy, backlog, and roadmap
-
-**Outputs:**
-
-- `./strategy/strategy.md` - Main strategy report
-- `./strategy/backlog.md` - Prioritized backlog with impact/effort scores
-- `./strategy/roadmap.md` - 2-week and 6-week execution plans
-- `./strategy/agent-*.md` - Individual agent reports
-
-**Flags:**
-
-- `--quick` - Fast scan (Architect, Quality, DX only)
-- `--security` - Security-focused analysis
-- `--deep` - Extended analysis with all agents
+**Flags:** `--quick` | `--security` | `--deep`
 
 ## Conventions
 
