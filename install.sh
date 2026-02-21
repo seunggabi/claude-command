@@ -14,15 +14,23 @@ set -euo pipefail
 #   ./install.sh --uninstall         # Remove block
 # ============================================================
 
-BLOCK_BEGIN="<!-- CLAUDE-COMMAND:BEGIN -->"
-BLOCK_END="<!-- CLAUDE-COMMAND:END -->"
+# Constants - Markers
+readonly BLOCK_BEGIN="<!-- CLAUDE-COMMAND:BEGIN -->"
+readonly BLOCK_END="<!-- CLAUDE-COMMAND:END -->"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOURCE_FILE="${SCRIPT_DIR}/CLAUDE.md"
-SOURCE_SETTINGS="${SCRIPT_DIR}/.claude/settings.json"
-COMMANDS_DIR="${SCRIPT_DIR}/.claude/commands"
+# Constants - Paths
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SOURCE_FILE="${SCRIPT_DIR}/CLAUDE.md"
+readonly SOURCE_SETTINGS="${SCRIPT_DIR}/.claude/settings.json"
+readonly COMMANDS_DIR="${SCRIPT_DIR}/.claude/commands"
 
-GLOBAL_SETTINGS="$HOME/.claude/settings.json"
+# Constants - Skills
+readonly SKILLS=(
+  "obra/superpowers"
+  "blader/humanizer"
+  "nextlevelbuilder/ui-ux-pro-max-skill"
+  "vercel-labs/skills"
+)
 
 # --- Parse arguments ---
 UNINSTALL=false
@@ -187,38 +195,26 @@ install_commands() {
 install_skills() {
   echo "Installing skills..."
 
-  # Check if npx is available
   if ! command -v npx &> /dev/null; then
     echo "  Warning: npx not found. Skipping skills installation."
-    echo "  To install skills manually, run:"
-    echo "    npx skills add obra/superpowers"
-    echo "    npx skills add blader/humanizer"
-    echo "    npx skills add nextlevelbuilder/ui-ux-pro-max-skill"
-    echo "    npx skills add vercel-labs/skills"
+    echo "  To install skills manually:"
+    printf '    npx skills add %s\n' "${SKILLS[@]}"
     return 0
   fi
 
-  local skills=(
-    "obra/superpowers"
-    "blader/humanizer"
-    "nextlevelbuilder/ui-ux-pro-max-skill"
-    "vercel-labs/skills"
-  )
+  local installed=0 failed=0
 
-  local installed=0
-  local failed=0
-
-  for skill in "${skills[@]}"; do
+  for skill in "${SKILLS[@]}"; do
     echo "  Installing $skill..."
     if npx skills add "$skill" 2>&1 | grep -q "Added\|already installed"; then
-      installed=$((installed + 1))
+      ((installed++))
     else
       echo "    Warning: Failed to install $skill"
-      failed=$((failed + 1))
+      ((failed++))
     fi
   done
 
-  echo "  Skills installation complete: $installed installed, $failed failed"
+  echo "  Skills: $installed installed, $failed failed"
 }
 
 # --- Uninstall mode ---
