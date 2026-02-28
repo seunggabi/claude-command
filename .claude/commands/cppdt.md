@@ -7,6 +7,7 @@ Sequentially executes `/commit-push-pr` → `/done` → `/tag` to complete the f
 1. **Phase 1 - Commit, Push, PR**: Create issue, branch, commit, push, and PR (`/commit-push-pr`)
 2. **Phase 2 - Done**: Merge PR and close issue (`/done`)
 3. **Phase 3 - Tag**: Create version tag and GitHub release (`/tag`)
+4. **Phase 4 - npm publish** *(optional)*: Publish to npm if a publishable package exists
 
 ## Execution Steps
 
@@ -61,6 +62,60 @@ git tag -l --sort=-v:refname | head -1  # Should show new tag
 gh release view --json tagName,url
 ```
 
+### Phase 4: npm Publish (Conditional)
+
+Skip this phase if no publishable package is found.
+
+**Detection**: A publishable package exists if **all** of the following conditions are true:
+
+1. A `package.json` exists with a `"name"` field and is **not** `"private": true`
+2. The package has been **previously published** to npm (i.e., it is not a brand-new package)
+
+A subdirectory (e.g., `dist/`, `lib/`, `packages/*`) with its own `package.json` is also a valid target.
+
+**Detection command**:
+
+```bash
+# Check root package.json
+cat package.json | jq '{name, private, publishConfig, files, main}'
+
+# Verify the package already exists on npm (skip if not found)
+npm view <package-name> version 2>/dev/null || echo "NOT_PUBLISHED"
+
+# Check subdirectories for nested packages
+find . -mindepth 2 -maxdepth 3 -name "package.json" \
+  -not -path "*/node_modules/*" \
+  -exec jq -r 'select(.name != null) | .name' {} \;
+```
+
+**Execution steps**:
+
+1. Identify the publish target directory (root or subdirectory)
+2. If a build step exists, run it first: `npm run build` (or `pnpm build` / `yarn build`)
+3. Verify the package version matches the newly created tag
+4. Run dry-run to confirm publish content:
+   ```bash
+   npm publish --dry-run [--directory <path>]
+   ```
+5. Publish to npm:
+   ```bash
+   npm publish [--directory <path>] [--access public]
+   ```
+
+**Gate**: Verify the package was published successfully.
+
+```bash
+npm view <package-name> version  # Should match the new tag version
+```
+
+**Skip conditions** (no retry, just skip):
+
+- No `package.json` found
+- `"private": true` is set
+- No npm auth token configured (`npm whoami` fails)
+- Package has **never been published** to npm (`npm view <name>` returns 404)
+- Package version already published (treat as success, no error)
+
 ## Retry Policy
 
 Each phase has up to **3 attempts** before aborting.
@@ -96,6 +151,9 @@ Phase N: Attempt 1
 | Phase 2 | Merge conflict | Attempt auto-resolve or inform user |
 | Phase 3 | Tag already exists | Bump to next version and retry |
 | Phase 3 | Push tag rejected | `git fetch --tags` and retry |
+| Phase 4 | npm auth error | Check `npm whoami`, re-auth, and retry |
+| Phase 4 | Build failed | Fix build error and retry |
+| Phase 4 | Version conflict | Version already published — treat as success, skip |
 
 ## Guidelines
 
@@ -116,6 +174,12 @@ Phase N: Attempt 1
 | Phase 2 | Merge fails | Fix and retry (up to 3x) |
 | Phase 3 | Not on main branch | Checkout main and retry (up to 3x) |
 | Phase 3 | No new commits since last tag | Skip tag creation, inform user (no retry) |
+| Phase 4 | No publishable package found | Skip Phase 4 entirely (no retry) |
+| Phase 4 | `"private": true` | Skip Phase 4 entirely (no retry) |
+| Phase 4 | Package never published to npm | Skip Phase 4 entirely (no retry) |
+| Phase 4 | npm not authenticated | Fix auth and retry (up to 3x) |
+| Phase 4 | Build step fails | Fix and retry (up to 3x) |
+| Phase 4 | Version already published | Treat as success, skip (no retry) |
 
 ## Examples
 
