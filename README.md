@@ -52,7 +52,7 @@ git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command \
 
 This installs:
 - Commands → `~/.claude/commands/`
-- Skills → Claude Code Skills (obra/superpowers, blader/humanizer, nextlevelbuilder/ui-ux-pro-max-skill, vercel-labs/skills)
+- Skills → `~/.claude/skills/` (strategy) + Claude Code Skills (obra/superpowers, blader/humanizer, nextlevelbuilder/ui-ux-pro-max-skill, vercel-labs/skills)
 - Settings → `~/.claude/settings.json`
 - Rules → `~/.claude/CLAUDE.md`
 
@@ -68,7 +68,7 @@ git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command &&
 
 This installs:
 - Commands → `.claude/commands/`
-- Skills → Claude Code Skills (obra/superpowers, blader/humanizer, nextlevelbuilder/ui-ux-pro-max-skill, vercel-labs/skills)
+- Skills → `.claude/skills/` (strategy) + Claude Code Skills (obra/superpowers, blader/humanizer, nextlevelbuilder/ui-ux-pro-max-skill, vercel-labs/skills)
 - Settings → `.claude/settings.json`
 - Rules → `.claude/CLAUDE.md`
 
@@ -112,7 +112,7 @@ Format: `{type}/#{issue_number}_{alias}` → `(#{issue_number}) {type}: {descrip
 
 ### `/done`
 
-Merges PR (squash) → closes issue → cleans up local branch.
+Checks CI status → merges PR (squash) → closes issue → cleans up local branch.
 
 ### `/cppdt`
 
@@ -128,7 +128,7 @@ Rebases current branch with main (stash → fetch → rebase → restore → for
 
 ### `/cleanup`
 
-Removes merged local and remote branches (with confirmation).
+Removes merged local and remote branches (with confirmation). Also handles `[gone]` branches (remote deleted, local still exists).
 
 ### `/status`
 
@@ -152,11 +152,11 @@ Generates markdown changelog grouped by commit type.
 
 ### `/strategy`
 
-Multi-agent repo analysis with 7 specialized agents.
+Multi-agent repo analysis with 7 specialized agents run in parallel (Architect, Product, Security, Ops, Performance, Quality, DX).
 
-Outputs to `./strategy/` with strategy, backlog, and roadmap.
+Outputs 12 reports to `./strategy/` including strategy, backlog, and roadmap.
 
-**Flags:** `--quick` | `--security` | `--deep`
+Also available as an auto-triggering skill — Claude will suggest it when you ask "what should I work on?" or "analyze this repo".
 
 ## Conventions
 

@@ -25,6 +25,7 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SOURCE_FILE="${SCRIPT_DIR}/CLAUDE.md"
 readonly SOURCE_SETTINGS="${SCRIPT_DIR}/.claude/settings.json"
 readonly COMMANDS_DIR="${SCRIPT_DIR}/.claude/commands"
+readonly LOCAL_SKILLS_DIR="${SCRIPT_DIR}/.claude/skills"
 
 # Constants - Skills
 readonly SKILLS=(
@@ -218,6 +219,50 @@ install_commands() {
   echo "  → $target_commands_dir"
 }
 
+# --- Helper: Install local skills (from repo) ---
+install_local_skills() {
+  local target_skills_dir="$1"
+  local installed=0 skipped=0 updated=0 failed=0
+
+  echo "Installing local skills..."
+
+  if [[ ! -d "$LOCAL_SKILLS_DIR" ]]; then
+    echo "  ⟳ No local skills directory found, skipping"
+    return 0
+  fi
+
+  mkdir -p "$target_skills_dir" || { echo "  ✗ Failed to create $target_skills_dir"; return; }
+
+  for skill_dir in "$LOCAL_SKILLS_DIR"/*/; do
+    [[ -d "$skill_dir" ]] || continue
+    local name
+    name="$(basename "$skill_dir")"
+    local target_dir="${target_skills_dir}/${name}"
+
+    if [[ -d "$target_dir" ]]; then
+      if diff -rq "$skill_dir" "$target_dir" > /dev/null 2>&1; then
+        echo "  ⟳ $name (already up to date)"
+        skipped=$((skipped + 1))
+        continue
+      else
+        echo "  ↑ $name (updated)"
+        updated=$((updated + 1))
+      fi
+    else
+      echo "  ✓ $name (installed)"
+      installed=$((installed + 1))
+    fi
+
+    if ! cp -rf "$skill_dir" "$target_skills_dir/"; then
+      echo "  ✗ $name (failed to copy)"
+      failed=$((failed + 1))
+    fi
+  done
+
+  echo "  Local skills: ${installed} installed, ${skipped} skipped, ${updated} updated, ${failed} failed"
+  echo "  → $target_skills_dir"
+}
+
 # --- Helper: Install skills ---
 install_skills() {
   local installed=0 skipped=0 failed=0
@@ -291,10 +336,15 @@ fi
 # Determine target directories
 TARGET_DIR="$(dirname "$TARGET_FILE")"
 TARGET_COMMANDS_DIR="${TARGET_DIR}/commands"
+TARGET_SKILLS_DIR="${TARGET_DIR}/skills"
 TARGET_SETTINGS="${TARGET_DIR}/settings.json"
 
 # Install commands
 install_commands "$TARGET_COMMANDS_DIR"
+echo ""
+
+# Install local skills (from repo)
+install_local_skills "$TARGET_SKILLS_DIR"
 echo ""
 
 # Install skills
@@ -333,7 +383,7 @@ echo "  ✓ Rules installed → $TARGET_FILE"
 echo ""
 echo "Done!"
 echo "  Commands  → $TARGET_COMMANDS_DIR"
-echo "  Skills    → Claude Code Skills"
+echo "  Skills    → $TARGET_SKILLS_DIR (local) + Claude Code Skills"
 echo "  Settings  → $TARGET_SETTINGS"
 echo "  Rules     → $TARGET_FILE"
 echo ""
