@@ -26,7 +26,15 @@ Extract issue number from branch name:
 ### Step 2: Check and merge PR
 
 ```bash
-gh pr view --json number,state,mergeable
+gh pr view --json number,state,mergeable,statusCheckRollup
+```
+
+Abort if:
+- `state` is not `OPEN`
+- `mergeable` is `CONFLICTING` (resolve conflicts first)
+- Any required CI check is failing
+
+```bash
 gh pr merge --squash --delete-branch
 ```
 

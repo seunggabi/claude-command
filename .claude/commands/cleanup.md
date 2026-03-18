@@ -56,6 +56,20 @@ git push origin --delete {branch_name}
 git branch -a
 ```
 
+## Handling [gone] Branches
+
+Branches where the remote was deleted but local still exists won't appear in `--merged`. Clean them separately:
+
+```bash
+# List [gone] branches
+git branch -vv | grep '\[gone\]'
+
+# Delete all [gone] branches
+git branch -vv | grep '\[gone\]' | awk '{print $1}' | xargs -r git branch -d
+```
+
+Or use `commit-commands:clean_gone` skill which handles this automatically (including worktree cleanup).
+
 ## Guidelines
 
 1. Always confirm before deleting remote branches
