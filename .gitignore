@@ -3,3 +3,4 @@
 .claude/logs/
 
 strategy/
+!.claude/skills/strategy/
