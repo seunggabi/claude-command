@@ -79,6 +79,7 @@ git clone https://github.com/seunggabi/claude-command.git /tmp/claude-command &&
 | `/release`        | Create version tag and GitHub release          |
 | `/changelog`      | Generate changelog from commits                |
 | `/strategy`       | Multi-agent repo analysis & next-step planning |
+| `/mac-optimize`   | macOS system cleanup, optimization & health check |
 
 ### `/commit-push-pr`
 
@@ -187,6 +188,31 @@ Comprehensive multi-agent repository analysis that produces an actionable strate
 - `--quick` - Fast scan (Architect, Quality, DX only)
 - `--security` - Security-focused analysis
 - `--deep` - Extended analysis with all agents
+
+### `/mac-optimize`
+
+macOS 시스템 전체 점검 및 최적화를 수행한다.
+
+**Features:**
+
+- 5 specialized agents (cache-cleaner, brew-updater, service-optimizer, disk-analyzer, system-health)
+- Safe deletion (move to `/tmp/` instead of `rm -rf`)
+- Before/After quantitative reporting
+
+**Workflow:**
+
+1. **Phase 1 - Diagnosis**: CPU, memory, disk, processes, caches, services scan
+2. **Phase 2 - Parallel Optimization**: Run all 5 agents simultaneously
+3. **Phase 3 - Follow-up**: Handle remaining issues (lock conflicts, hprof files, etc.)
+4. **Phase 4 - Report**: Generate comprehensive before/after report
+
+**Agents:**
+
+- `cache-cleaner` - pip, npm, brew, browser, JetBrains cache cleanup
+- `brew-updater` - Homebrew package update & doctor
+- `service-optimizer` - Stop unnecessary services (Kafka, Redis, etc.)
+- `disk-analyzer` - Large files, Docker, node_modules, git repos analysis
+- `system-health` - macOS updates, disk integrity, DNS flush, memory purge
 
 ## Conventions
 
